@@ -39,7 +39,11 @@ public class MapAction extends ActionSupport implements Preparable {
     private Integer maxYear;
     private Integer minAge;
     private Integer maxAge;
+    private String healthcare;
+    private String mortality;
     private String sex;
+    private String comorbidity;
+    private String disease;
     private String response;
 //    @Autowired
 //    private QuestionManager questionManager;
@@ -54,8 +58,11 @@ public class MapAction extends ActionSupport implements Preparable {
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
         HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
+        comorbidity = comorbidity.replaceAll(","," OR ");
+        disease = disease.replaceAll(","," OR ");
 //        query.setFQuery("age:["+minAge+" TO "+maxAge+"] year:["+minYear+" TO "+maxYear+"] sex:"+sex);
-        query.set("q","age:["+minAge+" TO "+maxAge+"] AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex);
+        query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
+                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
         query.setFacet(true);
         query.addFacetField("postal_code_5");
         query.setFacetLimit(-1);
@@ -152,5 +159,37 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setTotal(Long total) {
         this.total = total;
+    }
+
+    public String getComorbidity() {
+        return comorbidity;
+    }
+
+    public void setComorbidity(String comorbidity) {
+        this.comorbidity = comorbidity;
+    }
+
+    public String getDisease() {
+        return disease;
+    }
+
+    public void setDisease(String disease) {
+        this.disease = disease;
+    }
+
+    public String getHealthcare() {
+        return healthcare;
+    }
+
+    public void setHealthcare(String healthcare) {
+        this.healthcare = healthcare;
+    }
+
+    public String getMortality() {
+        return mortality;
+    }
+
+    public void setMortality(String mortality) {
+        this.mortality = mortality;
     }
 }

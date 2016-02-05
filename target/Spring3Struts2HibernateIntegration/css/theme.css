@@ -26,7 +26,7 @@
 .ui-widget textarea,
 .ui-widget button {
 	font-family: Segoe UI,Helvetica,Arial,sans-serif;
-	font-size: 1em;
+	font-size: 15px;
 }
 .ui-widget-content {
 	border: 1px solid #9c947c;

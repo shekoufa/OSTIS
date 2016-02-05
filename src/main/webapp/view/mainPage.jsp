@@ -16,67 +16,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="author" content="OSTIS">
-    <style type="text/css">
-        a{
-            outline: none !important;
-        }
-        input{
-            outline: none !important;
-        }
-        #logout-div{
-            float: right;
-            margin-top:7px;
-            margin-right: 10px;
-        }
-        .left {
-            width: 75%;
-            height: 535px;
-            float: left;
-        }
-
-        .right {
-            width: 200px;
-            height: 500px;
-            float: left;
-            padding: 10px;
-        }
-
-        .right div {
-            margin-bottom: 4px;
-        }
-
-        .right textarea {
-            height: 150px;
-            width: 300px;
-        }
-
-        .top-margin {
-            margin-top: 5px;
-        }
-
-        #map {
-            height: 500px;
-        }
-
-        #infoBox {
-            width: 300px;
-            color: black;
-        }
-    </style>
-    <link href="../css/bootstrap.css" rel="stylesheet">
-    <script src="../js/jquery.min.js"></script>
+    <link rel="stylesheet" href="../css/jquery-ui.min.css" type="text/css">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <script src="../js/jquery-2.1.4.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="../js/jquery-ui.js"></script>
     <script type="text/javascript" src="../js/GeoJSON.js"></script>
-    <link rel="stylesheet" href="../css/jquery-ui.css" type="text/css">
-    <link rel="stylesheet" href="../css/theme.css" type="text/css">
+    <%--<link rel="stylesheet" href="../css/theme.css" type="text/css">--%>
     <link rel="stylesheet" href="../css/jslider.css" type="text/css">
     <link rel="stylesheet" href="../css/jslider.blue.css" type="text/css">
     <link rel="stylesheet" href="../css/jslider.plastic.css" type="text/css">
     <link rel="stylesheet" href="../css/jslider.round.css" type="text/css">
     <link rel="stylesheet" href="../css/jslider.round.plastic.css" type="text/css">
     <link rel="stylesheet" href="../css/jquery.loadmask.css" type="text/css">
+    <link rel="stylesheet" href="../css/style.css" type="text/css">
+    <link rel="stylesheet" href="../css/timeline-style.css" type="text/css">
+    <link rel="stylesheet" href="../css/reset.css" type="text/css">
+    <link rel="stylesheet" href="../css/menu-style.css" type="text/css">
     <!-- end -->
 
     <!-- bin/jquery.slider.min.js -->
@@ -93,6 +50,15 @@
     <script type="text/javascript" src="../js/jsGradient.js"></script>
     <script type="text/javascript" src="../js/zipregions.js"></script>
     <script type="text/javascript" src="../js/jquery.loadmask.js"></script>
+    <script type="text/javascript" src="../js/jquery.mobile.custom.min.js"></script>
+    <script type="text/javascript" src="../js/main-timeline.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/modernizr.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/cron.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/jquery.timelinr-0.9.6.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/menu-main.js"></script> <!-- Resource jQuery -->
+
+    <%--<script type="text/javascript" src="../js/jquery.easing.1.3.js"></script> <!-- Resource jQuery -->--%>
+    <%--<script type="text/javascript" src="../js/jquery.easing.compatibility.js"></script> <!-- Resource jQuery -->--%>
     <script type="text/javascript">
         var total = 0;
         var features = [];
@@ -250,12 +216,24 @@
                 }
             }
         }
-        function sendRequest() {
-            $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
+        function sendRequest(timelineDate) {
+            if(timelineDate===undefined){
+//                $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
+            }else{
+            }
             var minAge = document.getElementById('minAge').value;
             var maxAge = document.getElementById('maxAge').value;
-            var minYear = document.getElementById('minYear').value;
-            var maxYear = document.getElementById('maxYear').value;
+
+            var minYear = 0;
+            var maxYear = 0;
+            if(timelineDate===undefined){
+                minYear = document.getElementById('minYear').value;
+                maxYear = document.getElementById('maxYear').value;
+            }else{
+                minYear = timelineDate;
+                maxYear = timelineDate;
+            }
+
             var sex = document.getElementById('sex').value;
             $.ajax({
                 url: "/sendRequest?minYear=" + minYear + "&maxYear=" + maxYear + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
@@ -273,10 +251,14 @@
                     for (var i = 0; i < res.length; i++) {
                         prepareForShowFeature(res[i].value, resultGradient[i], res[i].count);
                     }
-                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    if(timelineDate===undefined) {
+//                        $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    }
                 },
                 error: function (data, status, er) {
-                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    if(timelineDate===undefined) {
+//                        $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    }
                     alert("error: " + data + " status: " + status + " er:" + er);
 
                 }
@@ -492,81 +474,148 @@
                     <sec:authorize access="hasRole('ROLE_USER')"><li><a href="#tabs-3">Pie Chart</a></li></sec:authorize>
                     <sec:authorize access="hasRole('ROLE_USER')"><li><a href="#tabs-4">Histogram Chart</a></li></sec:authorize>
                 </ul>
-                <div id="tabs-1">
-                    <div class="col-xs-12" style="height: 555px;">
-                        <div class="col-xs-12">
-                            <div class="col-xs-12">
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">From Age:</div>
-                                    <div class="col-xs-12">
-                                        <sec:authorize access="hasRole('ROLE_USER')">
-                                            <input type="text" placeholder="Minimum Age..." id="minAge"
-                                                   class="form-control input-sm"/>
-                                        </sec:authorize>
-                                        <sec:authorize access="hasRole('ROLE_GUEST')">
-                                            <input value="18" type="hidden" id="minAge"/>
-                                            <label>18</label>
-                                        </sec:authorize>
-                                    </div>
-                                </div>
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">To Age:</div>
-                                    <div class="col-xs-12">
-                                        <sec:authorize access="hasRole('ROLE_USER')">
-                                            <input type="text" placeholder="Maximum Age..." id="maxAge"
-                                                   class="form-control input-sm"/>
-                                        </sec:authorize>
-                                        <sec:authorize access="hasRole('ROLE_GUEST')">
-                                            <input value="99" type="hidden" id="maxAge"/>
-                                            <label>99</label>
-                                        </sec:authorize>
-                                    </div>
-                                </div>
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">From Year:</div>
-                                    <div class="col-xs-12">
-                                        <input type="text" placeholder="Minimum Year..." id="minYear"
-                                               class="form-control input-sm"/>
-                                    </div>
-                                </div>
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">To Year:</div>
-                                    <div class="col-xs-12">
-                                        <input type="text" placeholder="Maximum Year..." id="maxYear"
-                                               class="form-control input-sm"/>
-                                    </div>
-                                </div>
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">Sex:</div>
-                                    <div class="col-xs-12">
-                                        <select id="sex" class="form-control input-sm">
-                                            <option value="*">All</option>
-                                            <option value="F">Female</option>
-                                            <option value="M">Male</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-xs-2">
+                <div id="tabs-1" style="height:100%">
+                    <div class="col-xs-12">
+                        <div class="col-xs-12  top-margin">
+                            <div class="col-xs-3">
+                                <ul class="cd-accordion-menu animated">
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="disease_type_chk" id="disease_type_chk" checked>
+                                        <label for="disease_type_chk">Disease Type</label>
+                                        <ul style="display: none;">
+                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="diabetes">Diabetes</a></li>
+                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cardiacarrest">Cardiac Arrest</a></li>
+                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cancer">Cancer</a></li>
+                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="hypertension">Hypertension</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="year_chk" id="year_chk" checked>
+                                        <label for="year_chk">Year</label>
+
+                                        <ul style="display: none;">
+                                            <br/>
+                                            <li class="input-class"><input type="text" placeholder="From Year..." id="minYear"
+                                                       class="form-control input-sm"/><br/></li>
+                                            <li class="input-class"><input type="text" placeholder="To Year..." id="maxYear"
+                                                           class="form-control input-sm"/><br/></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="age_chk" id="age_chk" checked>
+                                        <label for="age_chk">Age</label>
+
+                                        <ul style="display: none;">
+                                            <br/>
+                                            <li class="input-class"><input type="text" placeholder="From Age..." id="minAge"
+                                                                           class="form-control input-sm"/><br/></li>
+                                            <li class="input-class"><input type="text" placeholder="To Age..." id="maxAge"
+                                                                           class="form-control input-sm"/><br/></li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="sex_chk" id="sex_chk" checked>
+                                        <label for="sex_chk">Sex</label>
+
+                                        <ul style="display: none;">
+                                            <li class="input-class">
+                                                <br/>
+                                                <select id="sex" class="form-control input-sm">
+                                                    <option value="*">All</option>
+                                                    <option value="F">Female</option>
+                                                    <option value="M">Male</option>
+                                                </select>
+                                                <br/>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="health_chk" id="health_chk" checked>
+                                        <label for="health_chk">Healthcare Utilization</label>
+
+                                        <ul style="display: none;">
+                                            <li class="input-class">
+                                                <br/>
+                                                <select id="healthcare" class="form-control input-sm">
+                                                    <option value="*">Not important</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                                <br/>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="mortality_chk" id="mortality_chk" checked>
+                                        <label for="mortality_chk">Mortality</label>
+
+                                        <ul style="display: none;">
+                                            <li class="input-class">
+                                                <br/>
+                                                <select id="mortality" class="form-control input-sm">
+                                                    <option value="*">Not important</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                                <br/>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="has-children">
+                                        <input type="checkbox" name ="comorbidities_chk" id="comorbidities_chk" checked>
+                                        <label for="comorbidities_chk">Comorbidities</label>
+                                        <ul style="display: none;">
+                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="bloodpressure" onclick="handleActivation(this);">Blood Pressure</a></li>
+                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="nausia" onclick="handleActivation(this);">Nausia</a></li>
+                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="dizziness" onclick="handleActivation(this);">Dizziness</a></li>
+                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="seizure" onclick="handleActivation(this);">Seizure</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <div class="col-xs-12 text-center">
                                     <div class="btn-group">
                                         <input type="button" class="btn btn-primary btn-md" id="search-button" value="Search"
-                                               onclick="sendRequest();"/>
+                                               onclick="prepareSendRequest();"/>
                                         <input type="button" class="btn btn-warning btn-md" value="Clear"
                                                onclick="clearMap();"/>
                                     </div>
                                 </div>
                             </div>
-                            <textarea style="display:none;" id="put_geojson_string_here"></textarea>
-
-                            <div style="display:none;"><input type="button" class="btn btn-primary"
-                                                              value="Show GeoJSON above"
-                                                              onclick="rawGeoJSON();"/></div>
-                        </div>
-                        <div class="col-xs-12 top-margin">
-                            <div id="map"></div>
+                            <div class="col-xs-9">
+                                <div id="map"></div>
+                                <div class="col-xs-12" style="border: 1px solid #E1E1E1; border-radius: 5px; margin-top:10px;background: #E9E9E9;">
+                                    <%--<div class="col-xs-2"></div>--%>
+                                    <div class="col-xs-12">
+                                        <div id="timeline">
+                                            <ul id="dates">
+                                                <li><a href="#2000">1998</a></li>
+                                                <li><a href="#2000">1999</a></li>
+                                                <li><a href="#2000">2000</a></li>
+                                                <li><a href="#2001">2001</a></li>
+                                                <li><a href="#2002">2002</a></li>
+                                                <li><a href="#2003">2003</a></li>
+                                                <li><a href="#2004">2004</a></li>
+                                                <li><a href="#2005">2005</a></li>
+                                                <li><a href="#2006">2006</a></li>
+                                                <li><a href="#2007">2007</a></li>
+                                                <li><a href="#2008">2008</a></li>
+                                            </ul>
+                                            <ul id="issues">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <%--<div class="col-xs-2"></div>--%>
+                                </div>
+                                <div class="col-xs-12 text-center">
+                                    <input type="hidden" id="play_pause_hidden" value="pause"/>
+                                    <a href="javascript:void(0);" id="play_pause_a" onclick="playOrPause();"><img style="margin-top: 9px;" id="play_pause_img" src="../images/play.png" width="48" height="48"/></a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div style="clear: both"></div>
+                    <div style="clear:both;"></div>
                 </div>
+
                 <sec:authorize access="hasRole('ROLE_USER')">
                 <div id="tabs-2" style="display: inline-block;margin-top: 10px;width: 100%;">
                     <div class="left">
@@ -625,9 +674,94 @@
     </div>
 </div>
 <script type="text/javascript">
+    var inervalHolder;
+    var isPaused = true;
     jQuery(document).ready(function () {
         jQuery("#tabs").tabs();
+        $("#timeline").timelinr({
+            autoPlay: 'true',
+            autoPlayDirection: 'forward'
+        });
     });
+    function playOrPause(){
+        if($("#play_pause_img").attr("src").indexOf("play")>=0){
+            $("#play_pause_hidden").val("pause");
+            $("#play_pause_img").attr("src","../images/pause.png");
+            isPaused =false;
+        }else{
+            $("#play_pause_hidden").val("play");
+            $("#play_pause_img").attr("src","../images/play.png");
+            isPaused =true;
+        }
+
+    }
+    function handleActivation(elem){
+        if($(elem).hasClass("active")){
+            $(elem).removeClass("active");
+        }else{
+            $(elem).addClass("active");
+        }
+    }
+    function prepareSendRequest(timelineDate){
+        var disease = "";
+        $(".disease-selector.active").each(function(){
+            disease +=$(this).attr("disease")+",";
+        });
+        disease = disease.substr(0,disease.length-1);
+        var comorbidity = "";
+        $(".comorbidity-selector.active").each(function(){
+            comorbidity +=$(this).attr("comorbidity")+",";
+        })
+        comorbidity = comorbidity.substr(0,comorbidity.length-1);
+        if(timelineDate===undefined){
+            $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
+        }else{
+        }
+        var minAge = document.getElementById('minAge').value;
+        var maxAge = document.getElementById('maxAge').value;
+
+        var minYear = 0;
+        var maxYear = 0;
+        if(timelineDate===undefined){
+            minYear = document.getElementById('minYear').value;
+            maxYear = document.getElementById('maxYear').value;
+        }else{
+            minYear = timelineDate;
+            maxYear = timelineDate;
+        }
+        var sex = document.getElementById('sex').value;
+        var healthcare = document.getElementById('healthcare').value;
+        var mortality = document.getElementById('mortality').value;
+        $.ajax({
+            url: "/sendRequest?comorbidity="+comorbidity+"&disease="+disease+"&minYear=" + minYear + "&maxYear=" + maxYear +
+            "&healthcare=" + healthcare + "&mortality=" + mortality+ "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
+            type: 'GET',
+            dataType: 'json',
+            contentType: 'application/json',
+            mimeType: 'application/json',
+            success: function (data) {
+                clearMap();
+                var res = JSON.parse(data.facetfieldStr);
+                total = data.total;
+                var cnt = res.length;
+                var resultGradient = jsgradient.generateGradient('#FF0000', '#00FF15', cnt);
+                cnt = 0;
+                for (var i = 0; i < res.length; i++) {
+                    prepareForShowFeature(res[i].value, resultGradient[i], res[i].count);
+                }
+                if(timelineDate===undefined) {
+                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+                }
+            },
+            error: function (data, status, er) {
+                if(timelineDate===undefined) {
+                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+                }
+                alert("error: " + data + " status: " + status + " er:" + er);
+
+            }
+        });
+    }
 </script>
 </body>
 </html>

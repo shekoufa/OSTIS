@@ -6,6 +6,7 @@
 %>
 <html>
 <head>
+    <title>Welcome to OSTIS</title>
     <link href="../css/bootstrap.css" rel="stylesheet">
     <link href="../css/bootstrap-social.css" rel="stylesheet">
 

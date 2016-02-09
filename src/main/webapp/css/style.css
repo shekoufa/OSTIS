@@ -53,3 +53,6 @@ input{
     margin: 0 auto;
     width: 80%;
 }
+.gm-style-iw div{
+    overflow: hidden;
+}

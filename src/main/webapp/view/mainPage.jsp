@@ -14,8 +14,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <meta name="author" content="OSTIS">
+    <title>OSTIS - Main Dashboard</title>
     <link rel="stylesheet" href="../css/jquery-ui.min.css" type="text/css">
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <script src="../js/jquery-2.1.4.js"></script>
@@ -154,9 +154,6 @@
                     setInfoWindow(currentFeature_or_Features);
                 }
             }
-
-            document.getElementById("put_geojson_string_here").value = JSON.stringify(geojson);
-
         }
         function rawGeoJSON() {
             currentFeature_or_Features = new GeoJSON(JSON.parse(document.getElementById("put_geojson_string_here").value));
@@ -215,54 +212,6 @@
                     }
                 }
             }
-        }
-        function sendRequest(timelineDate) {
-            if(timelineDate===undefined){
-//                $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
-            }else{
-            }
-            var minAge = document.getElementById('minAge').value;
-            var maxAge = document.getElementById('maxAge').value;
-
-            var minYear = 0;
-            var maxYear = 0;
-            if(timelineDate===undefined){
-                minYear = document.getElementById('minYear').value;
-                maxYear = document.getElementById('maxYear').value;
-            }else{
-                minYear = timelineDate;
-                maxYear = timelineDate;
-            }
-
-            var sex = document.getElementById('sex').value;
-            $.ajax({
-                url: "/sendRequest?minYear=" + minYear + "&maxYear=" + maxYear + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
-                type: 'GET',
-                dataType: 'json',
-                contentType: 'application/json',
-                mimeType: 'application/json',
-                success: function (data) {
-                    clearMap();
-                    var res = JSON.parse(data.facetfieldStr);
-                    total = data.total;
-                    var cnt = res.length;
-                    var resultGradient = jsgradient.generateGradient('#FF0000', '#00FF15', cnt);
-                    cnt = 0;
-                    for (var i = 0; i < res.length; i++) {
-                        prepareForShowFeature(res[i].value, resultGradient[i], res[i].count);
-                    }
-//                    if(timelineDate===undefined) {
-//                        $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
-//                    }
-                },
-                error: function (data, status, er) {
-//                    if(timelineDate===undefined) {
-//                        $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
-//                    }
-                    alert("error: " + data + " status: " + status + " er:" + er);
-
-                }
-            });
         }
         function sendPieRequest() {
             var minYear = document.getElementById('minPieYear').value;
@@ -714,12 +663,12 @@
         })
         comorbidity = comorbidity.substr(0,comorbidity.length-1);
         if(timelineDate===undefined){
-            $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//            $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
         }else{
         }
         var minAge = document.getElementById('minAge').value;
         var maxAge = document.getElementById('maxAge').value;
-
+        console.log("minAge: "+minAge+" and maxAge: "+maxAge);
         var minYear = 0;
         var maxYear = 0;
         if(timelineDate===undefined){
@@ -750,12 +699,12 @@
                     prepareForShowFeature(res[i].value, resultGradient[i], res[i].count);
                 }
                 if(timelineDate===undefined) {
-                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
                 }
             },
             error: function (data, status, er) {
                 if(timelineDate===undefined) {
-                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
+//                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
                 }
                 alert("error: " + data + " status: " + status + " er:" + er);
 

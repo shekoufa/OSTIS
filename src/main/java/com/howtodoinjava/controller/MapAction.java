@@ -35,15 +35,15 @@ public class MapAction extends ActionSupport implements Preparable {
 
     //Logger configured using log4j
     private static final Logger logger = Logger.getLogger(String.valueOf(EditEmployeeAction.class));
-    private Integer minYear;
-    private Integer maxYear;
-    private Integer minAge;
-    private Integer maxAge;
-    private String healthcare;
-    private String mortality;
-    private String sex;
-    private String comorbidity;
-    private String disease;
+    private Integer minYear=1900;
+    private Integer maxYear=2200;
+    private Integer minAge=10;
+    private Integer maxAge=100;
+    private String healthcare="*";
+    private String mortality="*";
+    private String sex="*";
+    private String comorbidity="*";
+    private String disease="*";
     private String response;
 //    @Autowired
 //    private QuestionManager questionManager;
@@ -58,9 +58,28 @@ public class MapAction extends ActionSupport implements Preparable {
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
         HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
-        comorbidity = comorbidity.replaceAll(","," OR ");
-        disease = disease.replaceAll(","," OR ");
-//        query.setFQuery("age:["+minAge+" TO "+maxAge+"] year:["+minYear+" TO "+maxYear+"] sex:"+sex);
+        if(comorbidity.length()==0){
+            comorbidity="*";
+        }else {
+            comorbidity = comorbidity.replaceAll(",", " OR ");
+        }
+        if(disease.length()==0){
+            disease="*";
+        }else {
+            disease = disease.replaceAll(",", " OR ");
+        }
+        if(minAge==null){
+            minAge=10;
+        }
+        if(maxAge==null){
+            maxAge=200;
+        }
+        if(minYear==null){
+            minYear=1000;
+        }
+        if(maxYear==null){
+            maxYear=4000;
+        }
         query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
                 "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
         query.setFacet(true);

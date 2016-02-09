@@ -263,9 +263,7 @@ jQuery.fn.timelinr = function(options){
 
 // autoPlay, added since 0.9.4
 function autoPlay(){
-	console.log("This is isPaused value: "+isPaused);
 	if(!isPaused) {
-		console.log("I'm here!");
 		var currentDate = $(settings.datesDiv).find('a.' + settings.datesSelectedClass);
 		if (settings.autoPlayDirection == 'forward') {
 			if (currentDate.parent().is('li:last-child')) {

@@ -88,9 +88,22 @@ input{
     border: 2px solid #007FFF;
 }
 #table-container table{
-    background-color: #007FFF;
+    background-color: rgba(0, 127, 255,1);
 }
 #table-container th{
     color: white;
     font-weight: bold;
+}
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px; /* negative of the offset - height of link element */
+    right: 10px; /* padding from the left side of the window */
+}
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px; /* height of link element */
+    right: 10px; /* padding from the left side of the window */
+}
+.hidden{
+    display: none;
 }

@@ -23,6 +23,7 @@
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="../js/jquery-ui.js"></script>
     <script type="text/javascript" src="../js/GeoJSON.js"></script>
+    <%--<script type="text/javascript" src="../js/rainbowvis.js"></script>--%>
     <%--<link rel="stylesheet" href="../css/theme.css" type="text/css">--%>
     <link rel="stylesheet" href="../css/jslider.css" type="text/css">
     <link rel="stylesheet" href="../css/jslider.blue.css" type="text/css">
@@ -95,9 +96,12 @@
                 center: new google.maps.LatLng(48.4663, -55.8457),
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
+            var legend = document.getElementById('legend');
+            map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
 
         }
         function clearMap() {
+            clearLegend();
             for (var feature in features) {
                 cf = features[feature];
                 if (!cf)
@@ -425,139 +429,156 @@
                 </ul>
                 <div id="tabs-1" style="height:100%">
                     <div class="col-xs-12">
-                        <div class="col-xs-12  top-margin">
-                            <div class="col-xs-3">
-                                <ul class="cd-accordion-menu animated">
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="disease_type_chk" id="disease_type_chk" checked>
-                                        <label for="disease_type_chk">Disease Type</label>
-                                        <ul style="display: none;">
-                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="diabetes">Diabetes</a></li>
-                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cardiacarrest">Cardiac Arrest</a></li>
-                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cancer">Cancer</a></li>
-                                            <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="hypertension">Hypertension</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="year_chk" id="year_chk" checked>
-                                        <label for="year_chk">Year</label>
-
-                                        <ul style="display: none;">
-                                            <br/>
-                                            <li class="input-class"><input type="text" placeholder="From Year..." id="minYear"
-                                                       class="form-control input-sm"/><br/></li>
-                                            <li class="input-class"><input type="text" placeholder="To Year..." id="maxYear"
-                                                           class="form-control input-sm"/><br/></li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="age_chk" id="age_chk" checked>
-                                        <label for="age_chk">Age</label>
-
-                                        <ul style="display: none;">
-                                            <br/>
-                                            <li class="input-class"><input type="text" placeholder="From Age..." id="minAge"
-                                                                           class="form-control input-sm"/><br/></li>
-                                            <li class="input-class"><input type="text" placeholder="To Age..." id="maxAge"
-                                                                           class="form-control input-sm"/><br/></li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="sex_chk" id="sex_chk" checked>
-                                        <label for="sex_chk">Sex</label>
-
-                                        <ul style="display: none;">
-                                            <li class="input-class">
-                                                <br/>
-                                                <select id="sex" class="form-control input-sm">
-                                                    <option value="*">All</option>
-                                                    <option value="F">Female</option>
-                                                    <option value="M">Male</option>
-                                                </select>
-                                                <br/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="health_chk" id="health_chk" checked>
-                                        <label for="health_chk">Healthcare Utilization</label>
-
-                                        <ul style="display: none;">
-                                            <li class="input-class">
-                                                <br/>
-                                                <select id="healthcare" class="form-control input-sm">
-                                                    <option value="*">Not important</option>
-                                                    <option value="1">Yes</option>
-                                                    <option value="0">No</option>
-                                                </select>
-                                                <br/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="mortality_chk" id="mortality_chk" checked>
-                                        <label for="mortality_chk">Mortality</label>
-
-                                        <ul style="display: none;">
-                                            <li class="input-class">
-                                                <br/>
-                                                <select id="mortality" class="form-control input-sm">
-                                                    <option value="*">Not important</option>
-                                                    <option value="1">Yes</option>
-                                                    <option value="0">No</option>
-                                                </select>
-                                                <br/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li class="has-children">
-                                        <input type="checkbox" name ="comorbidities_chk" id="comorbidities_chk" checked>
-                                        <label for="comorbidities_chk">Comorbidities</label>
-                                        <ul style="display: none;">
-                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="bloodpressure" onclick="handleActivation(this);">Blood Pressure</a></li>
-                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="nausia" onclick="handleActivation(this);">Nausia</a></li>
-                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="dizziness" onclick="handleActivation(this);">Dizziness</a></li>
-                                            <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="seizure" onclick="handleActivation(this);">Seizure</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                                <div class="col-xs-12 text-center">
-                                    <div class="btn-group">
-                                        <input type="button" class="btn btn-primary btn-md" id="search-button" value="Search"
-                                               onclick="prepareSendRequest();"/>
-                                        <input type="button" class="btn btn-warning btn-md" value="Clear"
-                                               onclick="clearMap();"/>
-                                    </div>
-                                </div>
+                        <div class="col-xs-12">
+                            <div class="col-xs-3" style="padding-left: 43px;">
+                                <input style="margin-top:10px;" type="button" id="hide-filters-btn" class="btn btn-primary btn-xs" value="Hide Filters"
+                                       onclick="toggleFilters();"/>
                             </div>
-                            <div class="col-xs-9">
-                                <div id="map"></div>
-                                <div class="col-xs-12" style="border: 1px solid #E1E1E1; border-radius: 5px; margin-top:10px;background: #E9E9E9;">
-                                    <%--<div class="col-xs-2"></div>--%>
-                                    <div class="col-xs-12">
-                                        <div id="timeline">
-                                            <ul id="dates">
-                                                <li><a href="#2000">1998</a></li>
-                                                <li><a href="#2000">1999</a></li>
-                                                <li><a href="#2000">2000</a></li>
-                                                <li><a href="#2001">2001</a></li>
-                                                <li><a href="#2002">2002</a></li>
-                                                <li><a href="#2003">2003</a></li>
-                                                <li><a href="#2004">2004</a></li>
-                                                <li><a href="#2005">2005</a></li>
-                                                <li><a href="#2006">2006</a></li>
-                                                <li><a href="#2007">2007</a></li>
-                                                <li><a href="#2008">2008</a></li>
+                            <div class="col-xs-9"></div>
+                        </div>
+                        <div class="col-xs-12 top-margin">
+                            <div class="col-xs-12">
+                                <div class="col-xs-3" id="filters">
+                                    <ul class="cd-accordion-menu animated">
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="disease_type_chk" id="disease_type_chk" checked>
+                                            <label for="disease_type_chk">Disease Type</label>
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="diabetes">Diabetes</a></li>
+                                                <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cardiacarrest">Cardiac Arrest</a></li>
+                                                <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="cancer">Cancer</a></li>
+                                                <li><a class="disease-selector" style="text-decoration: none;" href="javascript:void(0);" onclick="handleActivation(this);" disease="hypertension">Hypertension</a></li>
                                             </ul>
-                                            <ul id="issues">
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="year_chk" id="year_chk" checked>
+                                            <label for="year_chk">Year</label>
+
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <br/>
+                                                <li class="input-class"><input type="text" placeholder="From Year..." id="minYear"
+                                                           class="form-control input-sm"/><br/></li>
+                                                <li class="input-class"><input type="text" placeholder="To Year..." id="maxYear"
+                                                               class="form-control input-sm"/><br/></li>
                                             </ul>
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="age_chk" id="age_chk" checked>
+                                            <label for="age_chk">Age</label>
+
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <br/>
+                                                <li class="input-class"><input type="text" placeholder="From Age..." id="minAge"
+                                                                               class="form-control input-sm"/><br/></li>
+                                                <li class="input-class"><input type="text" placeholder="To Age..." id="maxAge"
+                                                                               class="form-control input-sm"/><br/></li>
+                                            </ul>
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="sex_chk" id="sex_chk" checked>
+                                            <label for="sex_chk">Sex</label>
+
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <li class="input-class">
+                                                    <br/>
+                                                    <select id="sex" class="form-control input-sm">
+                                                        <option value="*">All</option>
+                                                        <option value="F">Female</option>
+                                                        <option value="M">Male</option>
+                                                    </select>
+                                                    <br/>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="health_chk" id="health_chk" checked>
+                                            <label for="health_chk">Healthcare Utilization</label>
+
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <li class="input-class">
+                                                    <br/>
+                                                    <select id="healthcare" class="form-control input-sm">
+                                                        <option value="*">Not important</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                    <br/>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="mortality_chk" id="mortality_chk" checked>
+                                            <label for="mortality_chk">Mortality</label>
+
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <li class="input-class">
+                                                    <br/>
+                                                    <select id="mortality" class="form-control input-sm">
+                                                        <option value="*">Not important</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                    <br/>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="has-children">
+                                            <input type="checkbox" name ="comorbidities_chk" id="comorbidities_chk" checked>
+                                            <label for="comorbidities_chk">Comorbidities</label>
+                                            <ul style="display: none;" class="inner-ul-menu">
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="bloodpressure" onclick="handleActivation(this);">Blood Pressure</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="nausia" onclick="handleActivation(this);">Nausia</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="dizziness" onclick="handleActivation(this);">Dizziness</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector" href="javascript:void(0);" comorbidity="seizure" onclick="handleActivation(this);">Seizure</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <div class="col-xs-12 text-center">
+                                        <div class="btn-group">
+                                            <input type="button" class="btn btn-primary btn-md" id="search-button" value="Search"
+                                                   onclick="prepareSendRequest();"/>
+                                            <input type="button" class="btn btn-warning btn-md" value="Clear"
+                                                   onclick="clearMap();"/>
                                         </div>
                                     </div>
-                                    <%--<div class="col-xs-2"></div>--%>
                                 </div>
-                                <div class="col-xs-12 text-center">
-                                    <input type="hidden" id="play_pause_hidden" value="pause"/>
-                                    <a href="javascript:void(0);" id="play_pause_a" onclick="playOrPause();"><img style="margin-top: 9px;" id="play_pause_img" src="../images/play.png" width="48" height="48"/></a>
+                                <div class="col-xs-9" id="map-container">
+                                    <div id="legend" style="width:210px;display: none;"><div style="margin-top:10px;" id="legend-content"></div></div>
+                                    <div id="map"></div>
+                                    <div class="btn-group">
+                                        <input style="margin-top:10px;" type="button" class="btn btn-primary btn-xs" value="Show Legend"
+                                               onclick="showLegend();"/>
+                                        <input style="margin-top:10px;" type="button" class="btn btn-warning btn-xs" id="legend-button" value="Hide Legend"
+                                               onclick="hideLegend();"/>
+                                    </div>
+                                    <div class="col-xs-12" style="border: 1px solid #E1E1E1; border-radius: 5px; margin-top:10px;background: #E9E9E9;">
+                                        <%--<div class="col-xs-2"></div>--%>
+                                        <div class="col-xs-12">
+                                            <div id="timeline">
+                                                <ul id="dates">
+                                                    <li><a href="#2000">1998</a></li>
+                                                    <li><a href="#2000">1999</a></li>
+                                                    <li><a href="#2000">2000</a></li>
+                                                    <li><a href="#2001">2001</a></li>
+                                                    <li><a href="#2002">2002</a></li>
+                                                    <li><a href="#2003">2003</a></li>
+                                                    <li><a href="#2004">2004</a></li>
+                                                    <li><a href="#2005">2005</a></li>
+                                                    <li><a href="#2006">2006</a></li>
+                                                    <li><a href="#2007">2007</a></li>
+                                                    <li><a href="#2008">2008</a></li>
+                                                </ul>
+                                                <ul id="issues">
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <%--<div class="col-xs-2"></div>--%>
+                                    </div>
+
+                                    <div class="col-xs-12 text-center">
+                                        <input type="hidden" id="play_pause_hidden" value="pause"/>
+                                        <a href="javascript:void(0);" id="play_pause_a" onclick="playOrPause();"><img style="margin-top: 9px;" id="play_pause_img" src="../images/play.png" width="48" height="48"/></a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -651,7 +672,35 @@
             $(elem).addClass("active");
         }
     }
+    function hideLegend(){
+        $("#legend").hide();
+    }
+    function showLegend(){
+        $("#legend").fadeIn("slow");
+    }
+    function clearLegend(){
+        $("#legend").hide();
+        $("#legend-content").html("");
+    }
+    function toggleFilters(){
+        if($("#filters").is(":visible")){
+            $("#filters").hide("slide", { direction: "left" }, "slow",function(){
+                $("#hide-filters-btn").attr("value","Show Filters");
+                $("#map-container").removeClass("col-xs-9");
+                $("#map-container").addClass("col-xs-12");
+                google.maps.event.trigger(map, "resize");
+//                init();
+            });
+        }else{
+            $("#map-container").removeClass("col-xs-12");
+            $("#map-container").addClass("col-xs-9");
+            $("#filters").show("slide", { direction: "left" }, "slow",function(){
+                $("#hide-filters-btn").attr("value","Hide Filters");
+            });
+        }
+    }
     function prepareSendRequest(timelineDate){
+        clearLegend();
         var disease = "";
         $(".disease-selector.active").each(function(){
             disease +=$(this).attr("disease")+",";
@@ -693,14 +742,21 @@
                 var res = JSON.parse(data.facetfieldStr);
                 total = data.total;
                 var cnt = res.length;
-                var resultGradient = jsgradient.generateGradient('#FF0000', '#00FF15', cnt);
+//                var resultGradient = jsgradient.generateGradient('#FFFFFF', '#FF0400', cnt);
+//                var rainbow = new Rainbow();
+//                rainbow.setSpectrum('red', 'FFFFFF', '#00ff00');
+                var resultGradient = jsgradient.generateGradient('#FFFFFF', '#FF0400', cnt);
                 cnt = 0;
                 for (var i = 0; i < res.length; i++) {
-                    prepareForShowFeature(res[i].value, resultGradient[i], res[i].count);
+                    if($("#"+res[i].color).length<=0) {
+                        $("#legend-content").append("<div id='" + res[i].color + "'><div class='col-xs-1' style='margin-bottom:5px; height:25px;background-color: "+res[i].color+"'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-10'>"+res[i].description+"</div></div>");
+                    }
+                    prepareForShowFeature(res[i].value, "#"+res[i].color, res[i].count);
                 }
                 if(timelineDate===undefined) {
 //                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
                 }
+                showLegend();
             },
             error: function (data, status, er) {
                 if(timelineDate===undefined) {

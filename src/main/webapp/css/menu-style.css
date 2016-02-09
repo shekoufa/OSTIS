@@ -277,3 +277,6 @@ a.active {
     -moz-transition: -moz-transform 0.3s;
     transition: transform 0.3s;
 }
+.inner-ul-menu{
+    background-color: #F6F6F6;
+}

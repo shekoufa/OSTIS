@@ -56,3 +56,24 @@ input{
 .gm-style-iw div{
     overflow: hidden;
 }
+
+#legend {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #0481FF;
+    border-top-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    text-align: center;
+    opacity: 0.5;
+}
+#legend:hover{
+    opacity: 1;
+}
+#legend h3 {
+    margin-top: 0;
+}
+#legend img {
+    vertical-align: middle;
+}

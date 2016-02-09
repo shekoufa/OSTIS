@@ -44,6 +44,9 @@ public class MapAction extends ActionSupport implements Preparable {
     private String sex="*";
     private String comorbidity="*";
     private String disease="*";
+    private Integer maximumCount = 0;
+    private Integer minimumCount = 0;
+    private Integer distance = 0;
     private String response;
 //    @Autowired
 //    private QuestionManager questionManager;
@@ -54,6 +57,14 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendRequest() throws SolrServerException {
+        String[] colorsGradient = new String[6];
+        String[] colorsDescription = new String[6];
+        colorsGradient[0]="FF0000";
+        colorsGradient[1]="FF6A00";
+        colorsGradient[2]="FFD400";
+        colorsGradient[3]="BFFF00";
+        colorsGradient[4]="55FF00";
+        colorsGradient[5]="00FF15";
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
         HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
@@ -98,19 +109,51 @@ public class MapAction extends ActionSupport implements Preparable {
         System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
 
         List<FacetField.Count> facetEntries = ff.getValues();
-        if (ff.getValues() != null) {
-            total = 0l;
-            for (FacetField.Count fcount : facetEntries) {
-                JSONObject attr = new JSONObject();
-                if(fcount.getName().toLowerCase().startsWith("a")) {
-                    attr.put("value", fcount.getName().toUpperCase());
-                    attr.put("count", fcount.getCount());
-                    total+=fcount.getCount();
-                    facetfield.put(attr);
+        if(facetEntries.size()>=3) {
+            long highestCount = facetEntries.get(1).getCount();
+            long lowestCount = facetEntries.get(facetEntries.size() - 1).getCount();
+            Double distanceDouble = Math.ceil((highestCount - lowestCount+1) / 6);
+            int distance = distanceDouble.intValue();
+            int cntDesc = 0;
+            for(long i = highestCount; i>=lowestCount; i = i - distance){
+                if(cntDesc==5){
+                    colorsDescription[cntDesc] = "Below "+(i);
+                    break;
+                }else {
+                    colorsDescription[cntDesc] = "From "+i+" to "+(i-distance);
+                }
+                cntDesc++;
+            }
+
+            if (ff.getValues() != null) {
+                total = 0l;
+                int rank = 1;
+                for (FacetField.Count fcount : facetEntries) {
+                    JSONObject attr = new JSONObject();
+                    if (fcount.getName().toLowerCase().startsWith("a")) {
+                        if (fcount.getCount() >= (highestCount-distance)) {
+                            attr.put("value", fcount.getName().toUpperCase());
+                            attr.put("count", fcount.getCount());
+                            attr.put("rank", rank);
+                            attr.put("color", colorsGradient[rank-1]);
+                            attr.put("description", colorsDescription[rank-1]);
+                        }else{
+                            highestCount = highestCount - distance;
+                            rank++;
+                            if(rank>6)rank=6;
+                            attr.put("value", fcount.getName().toUpperCase());
+                            attr.put("count", fcount.getCount());
+                            attr.put("rank", rank);
+                            attr.put("color", colorsGradient[rank-1]);
+                            attr.put("description", colorsDescription[rank-1]);
+                        }
+                        total += fcount.getCount();
+                        facetfield.put(attr);
+                    }
                 }
             }
+            facetfieldStr = facetfield.toString();
         }
-        facetfieldStr = facetfield.toString();
         System.out.println("After preparing the json: "+new Timestamp(System.currentTimeMillis()));
         System.out.println();
         return SUCCESS;
@@ -210,5 +253,29 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setMortality(String mortality) {
         this.mortality = mortality;
+    }
+
+    public Integer getMaximumCount() {
+        return maximumCount;
+    }
+
+    public void setMaximumCount(Integer maximumCount) {
+        this.maximumCount = maximumCount;
+    }
+
+    public Integer getMinimumCount() {
+        return minimumCount;
+    }
+
+    public void setMinimumCount(Integer minimumCount) {
+        this.minimumCount = minimumCount;
+    }
+
+    public Integer getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Integer distance) {
+        this.distance = distance;
     }
 }

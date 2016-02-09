@@ -62,7 +62,7 @@ jQuery.fn.timelinr = function(options){
 
 			$(settings.datesDiv+' a').click(function(event){
 				if(!isPaused) {
-					sendRequest(event.target.innerHTML);
+                    prepareSendRequest(event.target.innerHTML);
 				}
 
 				event.preventDefault();

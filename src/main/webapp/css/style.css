@@ -9,7 +9,7 @@ input{
 }
 #logout-div{
     float: right;
-    margin-top:7px;
+    margin-top:6px;
     margin-right: 10px;
 }
 .left {
@@ -76,4 +76,21 @@ input{
 }
 #legend img {
     vertical-align: middle;
+}
+.reporttable-row{
+    border-top: 1px solid black;
+    color: black;
+}
+#table-container{
+    margin-top: 10px;
+}
+#table-container tr.scrolled{
+    border: 2px solid #007FFF;
+}
+#table-container table{
+    background-color: #007FFF;
+}
+#table-container th{
+    color: white;
+    font-weight: bold;
 }

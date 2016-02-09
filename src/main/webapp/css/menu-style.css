@@ -41,7 +41,7 @@ Main Components
     max-width: 600px;
     background: #007FFF;
     margin: 0px auto 10px auto;
-    box-shadow: 0 4px 40px white;
+    /*box-shadow: 0 4px 40px white;*/
     border: 1px solid #003EFF;
     border-radius: 5px;
 

@@ -18,6 +18,7 @@
     <title>OSTIS - Main Dashboard</title>
     <link rel="stylesheet" href="../css/jquery-ui.min.css" type="text/css">
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="../js/jquery-2.1.4.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
@@ -188,10 +189,14 @@
         function setInfoWindow(feature) {
             google.maps.event.addListener(feature, "click", function (event) {
                 var content = "<div id='infoBox'><strong>Result for diabetes in this area:</strong><br />";
+                var postalcode = "";
                 for (var j in this.geojsonProperties) {
+                    if(j=="Postal Code"){
+                        postalcode = this.geojsonProperties[j];
+                    }
                     content += j + ": " + this.geojsonProperties[j] + "<br />";
                 }
-                content += "</div>";
+                content += "<button style='margin-top:5px;' onclick='scrollToId(\"ROW-"+postalcode+"\");' class='btn-xs btn btn-info'>Show in table</button> </div>";
                 infowindow.setContent(content);
                 infowindow.setPosition(event.latLng);
                 infowindow.open(map);
@@ -419,7 +424,7 @@
         <div class="col-xs-12">
             <div id="tabs">
                 <div id="logout-div">
-                    <a href="<c:url value="j_spring_security_logout" />" > Logout</a>
+                    <a href="<c:url value="j_spring_security_logout" />" ><i title="Logout" class="fa fa-sign-out fa-2x"></i></a>
                 </div>
                 <ul>
                     <li><a href="#tabs-1">Map Search</a></li>
@@ -431,10 +436,36 @@
                     <div class="col-xs-12">
                         <div class="col-xs-12">
                             <div class="col-xs-3" style="padding-left: 43px;">
-                                <input style="margin-top:10px;" type="button" id="hide-filters-btn" class="btn btn-primary btn-xs" value="Hide Filters"
+                                <input style="margin-top:10px;" type="button" id="hide-filters-btn" class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
                             </div>
-                            <div class="col-xs-9"></div>
+                            <div class="col-xs-9">
+                                <div class="col-xs-1 text-center">
+                                    <input type="hidden" id="play_pause_hidden" value="pause"/>
+                                    <a href="javascript:void(0);" id="play_pause_a" onclick="playOrPause();"><img id="play_pause_img" src="../images/play.png" width="48" height="48"/></a>
+                                </div>
+                                <div class="col-xs-11" style="padding: 0; border: 1px solid #E1E1E1; border-radius: 5px; background: #E9E9E9; width: 90%;overflow: hidden;">
+                                    <div class="col-xs-12" style="padding: 0;">
+                                        <div id="timeline">
+                                            <ul id="dates">
+                                                <li><a href="#2000">1998</a></li>
+                                                <li><a href="#2000">1999</a></li>
+                                                <li><a href="#2000">2000</a></li>
+                                                <li><a href="#2001">2001</a></li>
+                                                <li><a href="#2002">2002</a></li>
+                                                <li><a href="#2003">2003</a></li>
+                                                <li><a href="#2004">2004</a></li>
+                                                <li><a href="#2005">2005</a></li>
+                                                <li><a href="#2006">2006</a></li>
+                                                <li><a href="#2007">2007</a></li>
+                                                <li><a href="#2008">2008</a></li>
+                                            </ul>
+                                            <ul id="issues">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-xs-12 top-margin">
                             <div class="col-xs-12">
@@ -551,33 +582,8 @@
                                         <input style="margin-top:10px;" type="button" class="btn btn-warning btn-xs" id="legend-button" value="Hide Legend"
                                                onclick="hideLegend();"/>
                                     </div>
-                                    <div class="col-xs-12" style="border: 1px solid #E1E1E1; border-radius: 5px; margin-top:10px;background: #E9E9E9;">
-                                        <%--<div class="col-xs-2"></div>--%>
-                                        <div class="col-xs-12">
-                                            <div id="timeline">
-                                                <ul id="dates">
-                                                    <li><a href="#2000">1998</a></li>
-                                                    <li><a href="#2000">1999</a></li>
-                                                    <li><a href="#2000">2000</a></li>
-                                                    <li><a href="#2001">2001</a></li>
-                                                    <li><a href="#2002">2002</a></li>
-                                                    <li><a href="#2003">2003</a></li>
-                                                    <li><a href="#2004">2004</a></li>
-                                                    <li><a href="#2005">2005</a></li>
-                                                    <li><a href="#2006">2006</a></li>
-                                                    <li><a href="#2007">2007</a></li>
-                                                    <li><a href="#2008">2008</a></li>
-                                                </ul>
-                                                <ul id="issues">
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <%--<div class="col-xs-2"></div>--%>
-                                    </div>
+                                    <div id="table-container">
 
-                                    <div class="col-xs-12 text-center">
-                                        <input type="hidden" id="play_pause_hidden" value="pause"/>
-                                        <a href="javascript:void(0);" id="play_pause_a" onclick="playOrPause();"><img style="margin-top: 9px;" id="play_pause_img" src="../images/play.png" width="48" height="48"/></a>
                                     </div>
                                 </div>
                             </div>
@@ -685,6 +691,8 @@
     function toggleFilters(){
         if($("#filters").is(":visible")){
             $("#filters").hide("slide", { direction: "left" }, "slow",function(){
+                $("#hide-filters-btn").removeClass("btn-warning");
+                $("#hide-filters-btn").addClass("btn-primary");
                 $("#hide-filters-btn").attr("value","Show Filters");
                 $("#map-container").removeClass("col-xs-9");
                 $("#map-container").addClass("col-xs-12");
@@ -695,6 +703,8 @@
             $("#map-container").removeClass("col-xs-12");
             $("#map-container").addClass("col-xs-9");
             $("#filters").show("slide", { direction: "left" }, "slow",function(){
+                $("#hide-filters-btn").addClass("btn-warning");
+                $("#hide-filters-btn").removeClass("btn-primary");
                 $("#hide-filters-btn").attr("value","Hide Filters");
             });
         }
@@ -753,6 +763,8 @@
                     }
                     prepareForShowFeature(res[i].value, "#"+res[i].color, res[i].count);
                 }
+                $("#legend-content").append("<div class='col-xs-1' style='margin-bottom:5px; height:25px;background: url(../images/all-legend.png) no-repeat;'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-10'><b style='font-weight: bold;'>Total:</b> "+total+"</div>");
+                    createTable(res);
                 if(timelineDate===undefined) {
 //                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
                 }
@@ -766,6 +778,34 @@
 
             }
         });
+    }
+    function createTable(rows){
+        var tableStr = "";
+        tableStr="<table class='table'><thead><tr class='reporttable-row'><th>Rank</th><th>Postal Code</th><th>Provice</th><th>Occurance</th></tr></thead><tbody>";
+        for(var i=0; i < rows.length; i++){
+            tableStr+="<tr class='reporttable-row' id='ROW-"+rows[i].value+"' style='background-color:"+rows[i].color+"'><td>"+(i+1)+"</td><td>"+rows[i].value+"</td><td>Newfoundland & Labrador</td><td>"+rows[i].count+" individuals</td></tr>";
+        }
+        tableStr+="</tbody></table>";
+        $("#table-container").html(tableStr);
+    }
+    function scrollToId(theId){
+        var container = $("body");
+        var scrollTo = $("#"+theId);
+        $("#table-container tr").removeClass("scrolled");
+        scrollTo.addClass("scrolled");
+        blinker(scrollTo);
+        container.scrollTop(
+            scrollTo.offset().top - (container.offset().top + container.scrollTop()+25)
+        );
+    }
+    function blinker(elem){
+        elem.fadeOut("slow",function(){
+            elem.fadeIn("slow",function(){
+                elem.fadeOut("slow",function(){
+                    elem.fadeIn("slow");
+                })
+            })
+        })
     }
 </script>
 </body>

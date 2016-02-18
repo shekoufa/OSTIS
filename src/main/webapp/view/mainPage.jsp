@@ -121,10 +121,11 @@
             $("#sex").val("*");
             $("#healthcare").val("*");
             $("#mortality").val("*");
-            $("#timeline").timelinr({
-                autoPlay: 'true',
-                autoPlayDirection: 'forward'
-            });
+            handleTimeline();
+//            $("#timeline").timelinr({
+//                autoPlay: 'true',
+//                autoPlayDirection: 'forward'
+//            });
         }
         function clearMap() {
             clearLegend();

@@ -62,7 +62,7 @@ jQuery.fn.timelinr = function(options){
 
 			$(settings.datesDiv+' a').click(function(event){
 				if(!isPaused) {
-                    prepareSendRequest(event.target.innerHTML);
+                    //prepareSendRequest(event.target.innerHTML);
 				}
 
 				event.preventDefault();
@@ -249,7 +249,7 @@ jQuery.fn.timelinr = function(options){
 				}
 			}
 			// default position startAt, added since 0.9.3
-			$(settings.datesDiv+' li').eq(settings.startAt-1).find('a').trigger('click');
+			//$(settings.datesDiv+' li').eq(settings.startAt-1).find('a').trigger('click');
 			// autoPlay, added since 0.9.4
 			//if(settings.autoPlay == 'true') {
 			//	inervalHolder = setInterval(function(){

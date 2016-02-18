@@ -22,9 +22,12 @@
                 <c:if test="${not empty msg}">
                     <div class="msg">${msg}</div>
                 </c:if>
-                <div class="panel-body">
+                <div class="panel-body" style="margin-top: 50px;">
                     <form name='loginForm'
                           action="<c:url value='j_spring_security_check' />" method='POST'>
+                        <div class="form-group text-center">
+                            <img src="../images/logo.png"/>
+                        </div>
                         <h2 class="form-signin-heading">Please sign in</h2>
                         <div class="form-group">
                             <label class="control-label" for="focusedInput">Username</label>

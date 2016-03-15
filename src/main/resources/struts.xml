@@ -18,7 +18,7 @@
      -->
     <constant name="struts.enable.SlashesInActionNames" value="true"/>
     <constant name="struts.action.extension" value=""/>
-    <constant name="struts.action.excludePattern" value=".*jsp,.*htm,.*html,.*/css/.*,.*/images/.*,.*/js/.*"/>
+    <constant name="struts.action.excludePattern" value=".*jsp,.*htm,.*html,.*/css/.*,.*/images/.*,.*/img/.*,.*/font.*,.*/js/.*"/>
     <!-- Normal Action mappings are defined here -->
     <package name="ajax" namespace="" extends="json-default">
         <action name="sendRequest" class="com.howtodoinjava.controller.MapAction" method="sendRequest">
@@ -70,12 +70,15 @@
         <action name="login">
             <result>/view/login.jsp</result>
         </action>
+        <action name="landing">
+            <result>/view/landing.jsp</result>
+        </action>
         <action name="signout">
             <result>/view/login.jsp</result>
         </action>
 
         <action name="*">
-            <result type="redirect">/login</result>
+            <result type="redirect">/landing</result>
         </action>
 	</package>
 	

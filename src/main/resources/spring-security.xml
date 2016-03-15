@@ -6,6 +6,7 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
     <http pattern="/login*" security="none" use-expressions="true"/>
+    <http pattern="/landing*" security="none" use-expressions="true"/>
     <http auto-config="true" use-expressions="true">
         <intercept-url pattern="/*" access="hasAnyRole('ROLE_USER','ROLE_GUEST')"/>
         <!--<intercept-url pattern="/css/**" filters="none" />-->
@@ -14,8 +15,9 @@
         <intercept-url pattern="/user/**" access="hasRole('ROLE_USER')"/>
         <!--<access-denied-handler error-page="/view/403.jsp"  />-->
         <form-login
-                login-page="/login"
+                always-use-default-target="true"
                 default-target-url="/list"
+                login-page="/landing"
                 authentication-failure-url="/login?error"
                 username-parameter="username"
                 password-parameter="password" />

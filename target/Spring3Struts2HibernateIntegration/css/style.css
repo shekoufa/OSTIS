@@ -1,0 +1,109 @@
+html, body{
+    height: 100%;
+}
+a{
+    outline: none !important;
+}
+input{
+    outline: none !important;
+}
+#logout-div{
+    float: right;
+    margin-top:6px;
+    margin-right: 10px;
+}
+.left {
+    width: 75%;
+    height: 535px;
+    float: left;
+}
+
+.right {
+    width: 200px;
+    height: 500px;
+    float: left;
+    padding: 10px;
+}
+
+.right div {
+    margin-bottom: 4px;
+}
+
+.right textarea {
+    height: 150px;
+    width: 300px;
+}
+
+.top-margin {
+    margin-top: 5px;
+}
+
+#map {
+    height: 500px;
+}
+
+#infoBox {
+    width: 300px;
+    color: black;
+}
+#tabs{
+    height: 100%;
+}
+.input-class{
+    margin: 0 auto;
+    width: 80%;
+}
+.gm-style-iw div{
+    overflow: hidden;
+}
+
+#legend {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #0481FF;
+    border-top-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    text-align: center;
+    opacity: 0.5;
+}
+#legend:hover{
+    opacity: 1;
+}
+#legend h3 {
+    margin-top: 0;
+}
+#legend img {
+    vertical-align: middle;
+}
+.reporttable-row{
+    border-top: 1px solid black;
+    color: black;
+}
+#table-container{
+    margin-top: 10px;
+}
+#table-container tr.scrolled{
+    border: 2px solid #007FFF;
+}
+#table-container table{
+    background-color: rgba(0, 127, 255,1);
+}
+#table-container th{
+    color: white;
+    font-weight: bold;
+}
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px; /* negative of the offset - height of link element */
+    right: 10px; /* padding from the left side of the window */
+}
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px; /* height of link element */
+    right: 10px; /* padding from the left side of the window */
+}
+.hidden{
+    display: none;
+}

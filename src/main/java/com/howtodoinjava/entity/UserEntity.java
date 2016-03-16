@@ -37,6 +37,8 @@ public class UserEntity implements Serializable {
 
     @OneToMany(mappedBy="user")
     private List<UserRoleEntity> userroles;
+    @OneToMany(mappedBy="user")
+    private List<History> historyList;
      
     public String getEmail() {
         return email;
@@ -101,5 +103,13 @@ public class UserEntity implements Serializable {
 
     public void setCurrquestion(Integer currquestion) {
         this.currquestion = currquestion;
+    }
+
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

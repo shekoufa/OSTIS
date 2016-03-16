@@ -1,8 +1,13 @@
 package com.howtodoinjava.dao;
 
+import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.QuestionEntity;
 import com.howtodoinjava.entity.UserEntity;
 import com.howtodoinjava.entity.UserRoleEntity;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +39,36 @@ public class UserDaoImpl implements UserDAO {
         userRoleEntity.setUser(userEntity);
         this.sessionFactory.getCurrentSession().save(userRoleEntity);
         System.out.println("URE ID: "+userRoleEntity.getId());
+    }
+
+    @Override
+    public void addToHistory(History history) {
+        this.sessionFactory.getCurrentSession().save(history);
+    }
+
+    @Override
+    public UserEntity findUserByUsername(String remoteUser) {
+        UserEntity theUser = (UserEntity) this.sessionFactory.getCurrentSession().createCriteria(UserEntity.class)
+                .add(Restrictions.eq("username", remoteUser)).uniqueResult();
+        Hibernate.initialize(theUser.getUserroles());
+        Hibernate.initialize(theUser.getHistoryList());
+        return theUser;
+
+    }
+
+    @Override
+    public List<History> findHistoryByUserId(Integer userId) {
+        List<History> results = new ArrayList<History>();
+        results = this.sessionFactory.getCurrentSession().createCriteria(History.class).createAlias("user","u").add(Restrictions.eq("u.id",userId)).addOrder(Order.asc("createDate")).list();
+        return results;
+    }
+
+    @Override
+    public History findHistoryById(Integer historyId) {
+        History theHistory = (History) this.sessionFactory.getCurrentSession().createCriteria(History.class).createAlias("user","u").add(Restrictions.eq("id", historyId)).uniqueResult();
+        Hibernate.initialize(theHistory);
+        Hibernate.initialize(theHistory.getUser());
+        return theHistory;
     }
 
 }

@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 @Entity(name = "Branch")
 @Table(name = "TBL_Branch")
-public class Branch implements Serializable {
+public class History implements Serializable {
      
     @Id
     @Column(name="ID")

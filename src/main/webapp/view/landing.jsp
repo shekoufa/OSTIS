@@ -212,7 +212,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
-                <h2 class="section-heading">Our Team</h2>
+                <h2 class="section-heading">Core Development Team</h2>
                 <h3 class="section-subheading text-muted">Get to know us better</h3>
             </div>
         </div>

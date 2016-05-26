@@ -6,6 +6,7 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
     <http pattern="/login*" security="none" use-expressions="true"/>
+    <http pattern="/sendReq*" security="none" use-expressions="true"/>
     <http pattern="/landing*" security="none" use-expressions="true"/>
     <http auto-config="true" use-expressions="true">
         <intercept-url pattern="/*" access="hasAnyRole('ROLE_USER','ROLE_GUEST')"/>

@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDAO {
         UserEntity theUser = (UserEntity) this.sessionFactory.getCurrentSession().createCriteria(UserEntity.class)
                 .add(Restrictions.eq("username", remoteUser)).uniqueResult();
         Hibernate.initialize(theUser.getUserroles());
-        Hibernate.initialize(theUser.getHistoryList());
+//        Hibernate.initialize(theUser.getHistoryList());
         return theUser;
 
     }
@@ -68,6 +68,7 @@ public class UserDaoImpl implements UserDAO {
         History theHistory = (History) this.sessionFactory.getCurrentSession().createCriteria(History.class).createAlias("user","u").add(Restrictions.eq("id", historyId)).uniqueResult();
         Hibernate.initialize(theHistory);
         Hibernate.initialize(theHistory.getUser());
+//        Hibernate.initialize(theHistory.getUser().getHistoryList());
         return theHistory;
     }
 

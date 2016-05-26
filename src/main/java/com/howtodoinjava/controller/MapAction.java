@@ -11,8 +11,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.util.NamedList;
 import org.apache.struts2.ServletActionContext;
 import org.hibernate.Hibernate;
 import org.json.JSONArray;
@@ -20,9 +22,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -34,9 +34,14 @@ public class MapAction extends ActionSupport implements Preparable {
     private String facetfieldStr1;
     private String facetfieldStr2;
     private Long total;
+    private Long total1;
+    private Long total2;
     @Autowired
     private UserManager userManager;
     List<History> historyList = new ArrayList<History>();
+    private History history1;
+    private History history2;
+    private TreeMap<String, HashMap<String, Integer>> finalChartResult;
 
     @Override
     public void prepare() throws Exception {
@@ -71,6 +76,14 @@ public class MapAction extends ActionSupport implements Preparable {
 //        questionEntity = questionManager.findNextQuestion();
         return SUCCESS;
     }
+    public String history1Details(){
+        history1 = userManager.findHistoryById(historyId1);
+        return SUCCESS;
+    }
+    public String history2Details(){
+        history2 = userManager.findHistoryById(historyId2);
+        return SUCCESS;
+    }
     public String addToHistory(){
         System.out.println("Start addToHistory");
         UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
@@ -87,6 +100,7 @@ public class MapAction extends ActionSupport implements Preparable {
         history.setUser(user);
         history.setCreateDate(new Date());
         userManager.addToHistory(history);
+        historyId1 = history.getId();
         System.out.println("End addToHistory");
         return SUCCESS;
     }
@@ -101,7 +115,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[3]="BFFF00";
         colorsGradient[4]="55FF00";
         colorsGradient[5]="00FF15";
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         if(firstHistory.getComorbidity().length()==0){
             comorbidity="*";
@@ -133,6 +147,22 @@ public class MapAction extends ActionSupport implements Preparable {
         }else{
             maxYear = firstHistory.getMaxYear();
         }
+        if(firstHistory.getHealthCareUtilization().equals("0")){
+            healthcare = "0";
+        }else if(firstHistory.getHealthCareUtilization().equals("1")){
+            healthcare = "1";
+        }
+        if(firstHistory.getMortality().equals("0")){
+            mortality = "0";
+        }else if(firstHistory.getMortality().equals("1")){
+            mortality = "1";
+        }
+        if(firstHistory.getSex().equals("M")){
+            sex = "M";
+        }else if(firstHistory.getSex().equals("F")){
+            sex = "F";
+        }
+
         query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
                 "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
         query.setFacet(true);
@@ -160,13 +190,14 @@ public class MapAction extends ActionSupport implements Preparable {
                     colorsDescription[cntDesc] = "Below "+(i);
                     break;
                 }else {
-                    colorsDescription[cntDesc] = "From "+i+" to "+(i-distance);
+                    colorsDescription[cntDesc] = "From "+(i-distance)+" to "+(i);
                 }
                 cntDesc++;
             }
 
             if (ff.getValues() != null) {
-                total = 0l;
+                total1 = 0l;
+                total2 = 0l;
                 int rank = 1;
                 for (FacetField.Count fcount : facetEntries) {
                     JSONObject attr = new JSONObject();
@@ -188,7 +219,7 @@ public class MapAction extends ActionSupport implements Preparable {
                             attr.put("description", colorsDescription[rank-1]);
                             System.out.println();
                         }
-                        total += fcount.getCount();
+                        total1 += fcount.getCount();
                         facetfield.put(attr);
                     }
                 }
@@ -226,6 +257,21 @@ public class MapAction extends ActionSupport implements Preparable {
         }else{
             maxYear = secondHistory.getMaxYear();
         }
+        if(secondHistory.getHealthCareUtilization().equals("0")){
+            healthcare = "0";
+        }else if(secondHistory.getHealthCareUtilization().equals("1")){
+            healthcare = "1";
+        }
+        if(secondHistory.getMortality().equals("0")){
+            mortality = "0";
+        }else if(secondHistory.getMortality().equals("1")){
+            mortality = "1";
+        }
+        if(secondHistory.getSex().equals("M")){
+            sex = "M";
+        }else if(secondHistory.getSex().equals("F")){
+            sex = "F";
+        }
         query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
                 "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
         query.setFacet(true);
@@ -253,13 +299,13 @@ public class MapAction extends ActionSupport implements Preparable {
                     colorsDescription[cntDesc] = "Below "+(i);
                     break;
                 }else {
-                    colorsDescription[cntDesc] = "From "+i+" to "+(i-distance);
+                    colorsDescription[cntDesc] = "From "+(i-distance)+" to "+(i);
                 }
                 cntDesc++;
             }
 
             if (ff.getValues() != null) {
-                total = 0l;
+                total2 = 0l;
                 int rank = 1;
                 for (FacetField.Count fcount : facetEntries) {
                     JSONObject attr = new JSONObject();
@@ -281,7 +327,7 @@ public class MapAction extends ActionSupport implements Preparable {
                             attr.put("description", colorsDescription[rank-1]);
                             System.out.println();
                         }
-                        total += fcount.getCount();
+                        total2 += fcount.getCount();
                         facetfield.put(attr);
                     }
                 }
@@ -301,7 +347,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[5]="00FF15";
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         if(comorbidity.length()==0){
             comorbidity="*";
@@ -354,7 +400,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     colorsDescription[cntDesc] = "Below "+(i);
                     break;
                 }else {
-                    colorsDescription[cntDesc] = "From "+i+" to "+(i-distance);
+                    colorsDescription[cntDesc] = "From "+(i-distance)+" to "+(i);
                 }
                 cntDesc++;
             }
@@ -393,7 +439,174 @@ public class MapAction extends ActionSupport implements Preparable {
         System.out.println();
         return SUCCESS;
     }
+    public String sendBubbleChartReuqest() throws SolrServerException {
+        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        SolrQuery query = new SolrQuery();
+        HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
+        finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
+        query.set("q","year:*");
+        query.setFacet(true);
+        query.addFacetPivotField("postal_code_5,disease_type");
+        query.setFacetSort("postal_code_5 asc");
+        query.setFacetSort("disease_type asc");
+        query.setStart(0);
+        query.set("defType", "edismax");
+        QueryResponse response = solr.query(query);
+        NamedList<List<PivotField>> pivot = response.getFacetPivot();
+//        for (Map.Entry<String, List<PivotField>> pivotList : pivot) {
+//            String key = pivotList.getKey();
+//            List<PivotField> values = pivotList.getValue();
+//            for (PivotField value : values) {
+//                PivotField yearDiseasePivotField = value;
+//                Integer yearValue = (Integer)yearDiseasePivotField.getValue();
+//                HashMap<String, Integer> diseaseIntensity = new HashMap<String, Integer>();
+//                for (int i = 0;i<4; i++){
+//                    String diseaseName = (String) yearDiseasePivotField.getPivot().get(i).getValue();
+//                    Integer diseaseCount = (Integer) yearDiseasePivotField.getPivot().get(i).getCount();
+//                    diseaseIntensity.put(diseaseName,diseaseCount);
+//                }
+//                finalChartResult.put(yearValue+"",diseaseIntensity);
+//            }
+//        }
+        return SUCCESS;
+    }
+    public String sendDifferentDiseasesRequest() throws SolrServerException {
+        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        SolrQuery query = new SolrQuery();
+        HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
+        finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
+        query.set("q","year:["+minYear+" TO "+maxYear+"]");
+        query.setFacet(true);
+        query.addFacetPivotField("year,disease_type");
+        query.setFacetSort("year desc");
+        query.setFacetSort("disease_type asc");
+        query.setStart(0);
+        query.set("defType", "edismax");
+        QueryResponse response = solr.query(query);
+        NamedList<List<PivotField>> pivot = response.getFacetPivot();
+        for (Map.Entry<String, List<PivotField>> pivotList : pivot) {
+            String key = pivotList.getKey();
+            List<PivotField> values = pivotList.getValue();
+            for (PivotField value : values) {
+                PivotField yearDiseasePivotField = value;
+                Integer yearValue = (Integer)yearDiseasePivotField.getValue();
+                HashMap<String, Integer> diseaseIntensity = new HashMap<String, Integer>();
+                for (int i = 0;i<4; i++){
+                    String diseaseName = (String) yearDiseasePivotField.getPivot().get(i).getValue();
+                    Integer diseaseCount = (Integer) yearDiseasePivotField.getPivot().get(i).getCount();
+                    diseaseIntensity.put(diseaseName,diseaseCount);
+                }
+                finalChartResult.put(yearValue+"",diseaseIntensity);
+            }
+        }
+        return SUCCESS;
+    }
+    public String sendAgeGroupRequest() throws SolrServerException {
+        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        String key1= "20-40";
+        String key2= "41-60";
+        String key3= "61-80";
+        String key4= "81+";
+        SolrQuery query = new SolrQuery();
+        HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
+        finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
+        query.set("q","disease_type:"+disease);
+        query.setFacet(true);
+        query.addFacetPivotField("age,sex");
+        query.setFacetSort("age desc");
+//        query.setFacetSort("count");
+        query.setStart(0);
+        query.set("defType", "edismax");
+        QueryResponse response = solr.query(query);
+        NamedList<List<PivotField>> pivot = response.getFacetPivot();
+        for (Map.Entry<String, List<PivotField>> pivotList : pivot) {
+            String key = pivotList.getKey();
+            List<PivotField> values = pivotList.getValue();
+            for (PivotField value : values) {
+                PivotField ageSexPivotField = value;
+                Integer ageValue = (Integer)ageSexPivotField.getValue();
+                String sexDecider = (String) ageSexPivotField.getPivot().get(0).getValue();
+                Integer maleValue = 0;
+                Integer femaleValue = 0;
+                if(sexDecider.equalsIgnoreCase("m")){
+                    maleValue = ageSexPivotField.getPivot().get(0).getCount();
+                }else{
+                    femaleValue = ageSexPivotField.getPivot().get(1).getCount();
+                }
+                sexDecider = (String) ageSexPivotField.getPivot().get(1).getValue();
+                if(sexDecider.equalsIgnoreCase("m")){
+                    maleValue = ageSexPivotField.getPivot().get(0).getCount();
+                }else{
+                    femaleValue = ageSexPivotField.getPivot().get(1).getCount();
+                }
+                HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                femaleMaleMap.put("m",maleValue);
+                femaleMaleMap.put("f",femaleValue);
+                chartResult.put(ageValue,femaleMaleMap);
+            }
+        }
+        for (Integer integer : chartResult.keySet()) {
+            if(20<=integer && integer<=40){
+                if(finalChartResult.containsKey(key1)){
+                    int newMaleValue = getFinalChartResult().get(key1).get("m").intValue() + chartResult.get(integer).get("m").intValue();
+                    int newFemaleValue = getFinalChartResult().get(key1).get("f").intValue() + chartResult.get(integer).get("f").intValue();
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",newMaleValue);
+                    femaleMaleMap.put("f",newFemaleValue);
+                    finalChartResult.put(key1,femaleMaleMap);
+                }else{
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",chartResult.get(integer).get("m").intValue());
+                    femaleMaleMap.put("f",chartResult.get(integer).get("f").intValue());
+                    finalChartResult.put(key1,femaleMaleMap);
+                }
+            }else if(41<=integer && integer<=60){
+                if(finalChartResult.containsKey(key2)){
+                    int newMaleValue = getFinalChartResult().get(key2).get("m").intValue() + chartResult.get(integer).get("m").intValue();
+                    int newFemaleValue = getFinalChartResult().get(key2).get("f").intValue() + chartResult.get(integer).get("f").intValue();
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",newMaleValue);
+                    femaleMaleMap.put("f",newFemaleValue);
+                    finalChartResult.put(key2,femaleMaleMap);
+                }else{
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",chartResult.get(integer).get("m").intValue());
+                    femaleMaleMap.put("f",chartResult.get(integer).get("f").intValue());
+                    finalChartResult.put(key2,femaleMaleMap);
+                }
+            }else if(61<= integer && integer <=80){
+                if(finalChartResult.containsKey(key3)){
+                    int newMaleValue = getFinalChartResult().get(key3).get("m").intValue() + chartResult.get(integer).get("m").intValue();
+                    int newFemaleValue = getFinalChartResult().get(key3).get("f").intValue() + chartResult.get(integer).get("f").intValue();
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",newMaleValue);
+                    femaleMaleMap.put("f",newFemaleValue);
+                    finalChartResult.put(key3,femaleMaleMap);
+                }else{
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",chartResult.get(integer).get("m").intValue());
+                    femaleMaleMap.put("f",chartResult.get(integer).get("f").intValue());
+                    finalChartResult.put(key3,femaleMaleMap);
+                }
+            }else if(81<= integer && integer <=120){
+                if(finalChartResult.containsKey(key4)){
+                    int newMaleValue = getFinalChartResult().get(key4).get("m").intValue() + chartResult.get(integer).get("m").intValue();
+                    int newFemaleValue = getFinalChartResult().get(key4).get("f").intValue() + chartResult.get(integer).get("f").intValue();
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",newMaleValue);
+                    femaleMaleMap.put("f",newFemaleValue);
+                    finalChartResult.put(key4,femaleMaleMap);
+                }else{
+                    HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
+                    femaleMaleMap.put("m",chartResult.get(integer).get("m").intValue());
+                    femaleMaleMap.put("f",chartResult.get(integer).get("f").intValue());
+                    finalChartResult.put(key4,femaleMaleMap);
+                }
 
+            }
+        }
+        return SUCCESS;
+    }
     public Integer getMinYear() {
         return minYear;
     }
@@ -560,5 +773,45 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setFacetfieldStr2(String facetfieldStr2) {
         this.facetfieldStr2 = facetfieldStr2;
+    }
+
+    public History getHistory1() {
+        return history1;
+    }
+
+    public void setHistory1(History history1) {
+        this.history1 = history1;
+    }
+
+    public History getHistory2() {
+        return history2;
+    }
+
+    public void setHistory2(History history2) {
+        this.history2 = history2;
+    }
+
+    public Long getTotal1() {
+        return total1;
+    }
+
+    public void setTotal1(Long total1) {
+        this.total1 = total1;
+    }
+
+    public Long getTotal2() {
+        return total2;
+    }
+
+    public void setTotal2(Long total2) {
+        this.total2 = total2;
+    }
+
+    public TreeMap<String, HashMap<String, Integer>> getFinalChartResult() {
+        return finalChartResult;
+    }
+
+    public void setFinalChartResult(TreeMap<String, HashMap<String, Integer>> finalChartResult) {
+        this.finalChartResult = finalChartResult;
     }
 }

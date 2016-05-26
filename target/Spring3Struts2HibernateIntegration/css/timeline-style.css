@@ -13,6 +13,10 @@ a.selected {
     color: #ffcc00;
 }
 
+a.second-selected {
+    color: #ffcc00;
+}
+
 .sociales {
     text-align: center;
     margin-bottom: 20px;
@@ -24,6 +28,9 @@ a.selected {
     overflow: hidden;
     margin: 5px auto;
     position: relative;
+}
+#timeline a{
+    text-decoration:none !important;
 }
 
 #dates {
@@ -50,6 +57,10 @@ a.selected {
     font-size: 22px;
 }
 
+#dates .second-selected {
+    font-size: 22px;
+}
+
 #issues {
     width: 800px;
     height: 350px;
@@ -64,6 +75,14 @@ a.selected {
 }
 
 #issues li.selected img {
+    -webkit-transform: scale(1.1, 1.1);
+    -moz-transform: scale(1.1, 1.1);
+    -o-transform: scale(1.1, 1.1);
+    -ms-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+}
+
+#issues li.second-selected img {
     -webkit-transform: scale(1.1, 1.1);
     -moz-transform: scale(1.1, 1.1);
     -o-transform: scale(1.1, 1.1);

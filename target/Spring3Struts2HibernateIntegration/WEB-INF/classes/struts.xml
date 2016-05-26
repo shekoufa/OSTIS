@@ -33,7 +33,39 @@
                 <param name="noCache">true</param>
             </result>
         </action>
+        <action name="history1Details" class="com.howtodoinjava.controller.MapAction" method="history1Details">
+            <result type="json">
+                <param name="excludeNullProperties">true</param>
+                <param name="root">history1</param>
+                <param name="noCache">true</param>
+            </result>
+        </action>
+        <action name="history2Details" class="com.howtodoinjava.controller.MapAction" method="history2Details">
+            <result type="json">
+                <param name="excludeNullProperties">true</param>
+                <param name="root">history2</param>
+                <param name="noCache">true</param>
+            </result>
+        </action>
         <action name="addToHistory" class="com.howtodoinjava.controller.MapAction" method="addToHistory">
+            <result type="json">
+                <param name="excludeNullProperties">false</param>
+                <param name="noCache">true</param>
+            </result>
+        </action>
+        <action name="sendAgeGroupRequest" class="com.howtodoinjava.controller.MapAction" method="sendAgeGroupRequest">
+            <result type="json">
+                <param name="excludeNullProperties">false</param>
+                <param name="noCache">true</param>
+            </result>
+        </action>
+        <action name="sendDifferentDiseasesRequest" class="com.howtodoinjava.controller.MapAction" method="sendDifferentDiseasesRequest">
+            <result type="json">
+                <param name="excludeNullProperties">false</param>
+                <param name="noCache">true</param>
+            </result>
+        </action>
+        <action name="sendBubbleChartRequest" class="com.howtodoinjava.controller.MapAction" method="sendBubbleChartReuqest">
             <result type="json">
                 <param name="excludeNullProperties">false</param>
                 <param name="noCache">true</param>

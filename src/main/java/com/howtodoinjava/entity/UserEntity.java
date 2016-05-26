@@ -35,10 +35,10 @@ public class UserEntity implements Serializable {
     @Column(name="ENABLED")
     private Boolean enabled;
 
-    @OneToMany(mappedBy="user")
+    @OneToMany(mappedBy="user", fetch = FetchType.EAGER)
     private List<UserRoleEntity> userroles;
-    @OneToMany(mappedBy="user")
-    private List<History> historyList;
+//    @OneToMany(mappedBy="user")
+//    private List<History> historyList;
      
     public String getEmail() {
         return email;
@@ -105,11 +105,11 @@ public class UserEntity implements Serializable {
         this.currquestion = currquestion;
     }
 
-    public List<History> getHistoryList() {
-        return historyList;
-    }
+//    public List<History> getHistoryList() {
+//        return historyList;
+//    }
 
-    public void setHistoryList(List<History> historyList) {
-        this.historyList = historyList;
-    }
+//    public void setHistoryList(List<History> historyList) {
+//        this.historyList = historyList;
+//    }
 }

@@ -115,7 +115,8 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[3]="BFFF00";
         colorsGradient[4]="55FF00";
         colorsGradient[5]="00FF15";
-        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+//        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         if(firstHistory.getComorbidity().length()==0){
             comorbidity="*";
@@ -347,7 +348,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[5]="00FF15";
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
-        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         if(comorbidity.length()==0){
             comorbidity="*";
@@ -440,7 +441,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendBubbleChartReuqest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -471,7 +472,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendDifferentDiseasesRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -502,7 +503,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendAgeGroupRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
         String key1= "20-40";
         String key2= "41-60";
         String key3= "61-80";

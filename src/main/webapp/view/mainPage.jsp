@@ -1315,6 +1315,15 @@
                                            id="hide-legend-button" value="Hide Legend"
                                            onclick="hideLegend();"/>
                                 </div>
+                                <div id="statistics-container" style="margin-top: 20px; display:none;">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <div style="display: inline-block;"><img src="../images/statistics.png" width="48px"/></div>
+                                            <div style="display: inline-block; vertical-align: top;margin-top: 15px;">Result's statistics</div>
+                                        </div>
+                                        <div id="age-statistics-container" class="panel-body"></div>
+                                    </div>
+                                </div>
                                 <div id="table-container">
                                 </div>
                             </div>
@@ -1774,7 +1783,6 @@
         var sex = document.getElementById('sex').value;
         var healthcare = document.getElementById('healthcare').value;
         var mortality = document.getElementById('mortality').value;
-
         $.ajax({
             url: "/sendRequest?comorbidity=" + comorbidity + "&disease=" + disease + "&minYear=" + minYear + "&maxYear=" + maxYear +
             "&healthcare=" + healthcare + "&mortality=" + mortality + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
@@ -1785,6 +1793,13 @@
             success: function (data) {
                 clearMap();
                 var res = JSON.parse(data.facetfieldStr);
+                var stats = JSON.parse(data.statsObjectStr);
+                var ageStats = stats.ageStatistics;
+                var ageAverage = ageStats.average;
+                var ageMin = ageStats.min;
+                var ageMax = ageStats.max;
+                var ageCount = ageStats.count;
+                var ageStddev = ageStats.stddev;
                 total = data.total;
                 var cnt = res.length;
 //                var resultGradient = jsgradient.generateGradient('#FFFFFF', '#FF0400', cnt);
@@ -1793,8 +1808,11 @@
                 var resultGradient = jsgradient.generateGradient('#FFFFFF', '#FF0400', cnt);
                 cnt = 0;
                 for (var i = 0; i < res.length; i++) {
+                    console.log(res[i].color);
                     if ($("#" + res[i].color).length <= 0) {
-                        $("#legend-content").append("<div id='" + res[i].color + "'><div class='col-xs-1' style='margin-bottom:5px; height:25px;background-color: " + res[i].color + "'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-10'>" + res[i].description + "</div></div>");
+                        if(res[i].color!=undefined) {
+                            $("#legend-content").append("<div id='" + res[i].color + "'><div class='col-xs-1' style='margin-bottom:5px; height:25px;background-color: " + res[i].color + "'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-10'>" + res[i].description + "</div></div>");
+                        }
                     }
                     prepareForShowFeature(res[i].value, "#" + res[i].color, res[i].count);
                 }
@@ -1809,7 +1827,14 @@
                 if (maxYear == "" || parseInt(maxYear) > 2008)maxYear = 2008;
                 $("#a-" + minYear).addClass("selected");
                 $("#a-" + maxYear).addClass("selected");
-
+                var statsHtml = "<div class='stats-category'>Statistics related to <b style='font-weight: bolder;'>age</b>:</div>"
+                        +"<div class='stats-wrapper'><div class='stats-title'>Total count:</div><div class='stats-value'>"+ageCount+"</div></div>"
+                        +"<div class='stats-wrapper'><div class='stats-title'>Minimum value:</div><div class='stats-value'>"+ageMin+"</div></div>"
+                        +"<div class='stats-wrapper'><div class='stats-title'>Maximum value:</div><div class='stats-value'>"+ageMax+"</div></div>"
+                        +"<div class='stats-wrapper'><div class='stats-title'>Average:</div><div class='stats-value'>"+parseFloat(ageAverage).toFixed(4)+"</div></div>"
+                        +"<div class='stats-wrapper'><div class='stats-title'>Standard Deviation:</div><div class='stats-value'>"+parseFloat(ageStddev).toFixed(4)+"</div></div>"
+                $("#age-statistics-container").html(statsHtml);
+                $("#statistics-container").show();
             },
             error: function (data, status, er) {
                 if (timelineDate === undefined) {

@@ -113,3 +113,17 @@ input{
 #comparemaps-container{
     margin-top: 10px;
 }
+.stats-wrapper{
+    margin-top: 10px;
+    padding-top:10px;
+    border-top: 1px solid grey;
+}
+.stats-wrapper .stats-title{
+    display: inline-block;
+    font-weight: bold;
+    min-width: 170px;
+}
+.stats-wrapper .stats-value{
+    display: inline-block;
+    font-style: italic;
+}

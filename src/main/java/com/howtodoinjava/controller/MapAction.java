@@ -11,6 +11,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
@@ -42,6 +43,7 @@ public class MapAction extends ActionSupport implements Preparable {
     private History history1;
     private History history2;
     private TreeMap<String, HashMap<String, Integer>> finalChartResult;
+    private String statsObjectStr;
 
     @Override
     public void prepare() throws Exception {
@@ -381,14 +383,15 @@ public class MapAction extends ActionSupport implements Preparable {
         query.setFacetSort("count");
         query.setStart(0);
         query.set("defType", "edismax");
-
+        query.setGetFieldStatistics(true);
+        query.setGetFieldStatistics("age");
 
         QueryResponse response = solr.query(query);
         FacetField ff = response.getFacetField("postal_code_5");
         JSONArray facetfield = new JSONArray();
-
+        System.out.println(query.toString());
         System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
-
+        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get("age");
         List<FacetField.Count> facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
             long highestCount = facetEntries.get(1).getCount();
@@ -434,7 +437,19 @@ public class MapAction extends ActionSupport implements Preparable {
                     }
                 }
             }
+            statsObjectStr = new String();
+            JSONObject statsObject =new JSONObject();
+            JSONObject ageStats = new JSONObject();
+            ageStats.put("count",statsInfo.getCount());
+            ageStats.put("coundDistinct", statsInfo.getCountDistinct());
+            ageStats.put("min", statsInfo.getMin());
+            ageStats.put("max", statsInfo.getMax());
+            ageStats.put("average", statsInfo.getMean());
+            ageStats.put("stddev",statsInfo.getStddev());
+            statsObject.put("ageStatistics",ageStats);
+            statsObjectStr = statsObject.toString();
             facetfieldStr = facetfield.toString();
+
         }
         System.out.println("After preparing the json: "+new Timestamp(System.currentTimeMillis()));
         System.out.println();
@@ -814,5 +829,13 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setFinalChartResult(TreeMap<String, HashMap<String, Integer>> finalChartResult) {
         this.finalChartResult = finalChartResult;
+    }
+
+    public String getStatsObjectStr() {
+        return statsObjectStr;
+    }
+
+    public void setStatsObjectStr(String statsObjectStr) {
+        this.statsObjectStr = statsObjectStr;
     }
 }

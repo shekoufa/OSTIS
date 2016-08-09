@@ -7,6 +7,9 @@ a{
 input{
     outline: none !important;
 }
+.col-xs-12{
+    padding: 0;
+}
 #logout-div{
     float: right;
     margin-top:6px;
@@ -35,7 +38,7 @@ input{
 }
 
 .top-margin {
-    margin-top: 5px;
+    margin-top: -40px;
 }
 
 #map {
@@ -77,6 +80,21 @@ input{
 #legend img {
     vertical-align: middle;
 }
+#map-container #map{
+    height: 90vh !important;
+}
+#timeline-wrapper{
+    padding: 0;
+    position: absolute;
+    right: 25px;
+    top: 5px;
+    width:70%;
+    z-index: 1;
+}
+#top-functions{
+    float:left;
+    z-index: 1;
+}
 .reporttable-row{
     border-top: 1px solid black;
     color: black;
@@ -103,6 +121,11 @@ input{
     position: fixed; /* keeps it on the bottom once in view */
     bottom: 18px; /* height of link element */
     right: 10px; /* padding from the left side of the window */
+}
+#filters{
+    position: absolute;
+    z-index: 1;
+    top: 5px;
 }
 .hidden{
     display: none;

@@ -106,7 +106,7 @@
         function init() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 7,
-                center: new google.maps.LatLng(48.4663, -55.8457),
+                center: new google.maps.LatLng(49.0363, -56),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 keyboardShortcuts: false,
 //                disableDefaultUI: true,
@@ -712,11 +712,11 @@
                         },
                         series: [{
                             type: 'column',
-                            name: 'Cardiac-arrest',
+                            name: 'Cardiovascular Disease',
                             data: cardiacArray
                         }, {
                             type: 'column',
-                            name: 'Cancer',
+                            name: 'Chronic obstructive pulmonary disease',
                             data: cancerArray
                         },{
                             type: 'column',
@@ -735,7 +735,7 @@
                             type: 'pie',
                             name: 'Total occurrences from '+$("#diff_dis_min_year").val()+" to "+$("#diff_dis_max_year").val(),
                             data: [{
-                                name: 'Cardiac-arrest',
+                                name: 'Cardiovascular Disease',
                                 y: totalCardiac,
                                 color: Highcharts.getOptions().colors[0] // Jane's color
                             }, {
@@ -747,7 +747,7 @@
                                 y: totalDiabetes,
                                 color: Highcharts.getOptions().colors[2] // Jane's color
                             },{
-                                name: 'Cancer',
+                                name: 'Chronic obstructive pulmonary disease',
                                 y: totalCancer,
                                 color: Highcharts.getOptions().colors[1] // Jane's color
                             }],
@@ -1100,6 +1100,7 @@
                 <div id="logout-div">
 
                     <%--<a href="<c:url value="j_spring_security_logout" />" ><i title="Logout" class="fa fa-sign-out fa-2x"></i></a>--%>
+                    <a id="loading-spinner" style="display:none;position: absolute;left: 360px;" onclick="void(0);" href="javascript:void(0);"><i class="fa fa-spinner fa-spin fa-2x" aria-hidden="true"></i> loading results...</a>
                     <a onclick="logout();" href="javascript:void(0);"><i title="Logout"
                                                                          class="fa fa-sign-out fa-2x"></i></a>
                 </div>
@@ -1113,19 +1114,18 @@
                 </ul>
                 <div id="tabs-1" style="height:100%">
                     <div class="col-xs-12">
-                        <div class="col-xs-12">
+                        <div class="col-xs-12" id="top-functions">
                             <div class="col-xs-1">
                                 <input style="margin-top:10px;" type="button" id="hide-filters-btn"
                                        class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
                             </div>
-                            <div class="col-xs-2">
-                                <div style="margin-top:10px;">
-                                    <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save
-                                    Queries</label>
+                            <div class="">
+                                <div style="position: absolute; left: 260px; margin-top:10px;">
+                                    <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save Queries</label>
                                 </div>
                             </div>
-                            <div class="col-xs-9">
+                            <div class="" id="timeline-wrapper">
                                 <div class="col-xs-12"
                                      style="padding: 0; border: 1px solid #E1E1E1; border-radius: 5px; background: #E9E9E9;">
                                     <div class="col-xs-12" style="padding: 0;">
@@ -1177,10 +1177,10 @@
                         <div class="col-xs-12 top-margin">
                             <div class="col-xs-3" id="filters">
                                 <div class="col-xs-12 text-center" style="margin-bottom: 10px;">
-                                    <div class="btn-group">
+                                    <div class="btn-group" style="z-index:2;">
                                         <input type="button" class="btn btn-primary btn-md" id="search-button"
                                                value="Search"
-                                               onclick="prepareSendRequest();"/>
+                                               onclick="toggleFilters();prepareSendRequest();"/>
                                         <input type="button" class="btn btn-warning btn-md" value="Clear"
                                                onclick="clearMap();clearFilter();"/>
                                     </div>
@@ -1193,18 +1193,36 @@
                                         </div>
                                         <div style="padding: 0!important;" class="cd-accordion-menu">
                                             <ul class="inner-ul-menu" style="display: block !important;">
-                                                <li><a class="disease-selector" style="text-decoration: none;"
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="diabetes">Diabetes</a></li>
-                                                <li><a class="disease-selector" style="text-decoration: none;"
+                                                       disease="diabetes"><img src="../images/unchecked.png"/> Diabetes</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="cardiacarrest">Cardiac Arrest</a></li>
-                                                <li><a class="disease-selector" style="text-decoration: none;"
+                                                       disease="cardiacarrest"><img src="../images/unchecked.png"/> Cardiovascular Disease</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="cancer">Cancer</a></li>
-                                                <li><a class="disease-selector" style="text-decoration: none;"
+                                                       disease="cancer"><img src="../images/unchecked.png"/> Obstructive pulmonary disease</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="hypertension">Hypertension</a></li>
+                                                       disease="hypertension"><img src="../images/unchecked.png"/> Hypertension</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="mentalillness">Mental illness</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="anxiety">Mood and anxiety disorders</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="asthma">Asthma</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="ischemic-heartdisease">Ischemic Heart Disease</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="myocardial">Acute Myocardial Infarction</a></li>
+                                                <li><a class="non-functional" disabled style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="void(0);"
+                                                       disease="heart-failure">Heart Failure</a></li>
                                             </ul>
                                         </div>
                                         <h3>Year</h3>
@@ -1276,18 +1294,42 @@
                                         <h3>Comorbidities</h3>
                                         <div style="padding: 0!important;" class="cd-accordion-menu">
                                             <ul style="display: block !important;" class="inner-ul-menu">
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector"
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
                                                        href="javascript:void(0);" comorbidity="bloodpressure"
-                                                       onclick="handleActivation(this);">Blood Pressure</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector"
+                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Ischemic Heart Disease</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
                                                        href="javascript:void(0);" comorbidity="nausia"
-                                                       onclick="handleActivation(this);">Nausea</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector"
+                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Heart Failure</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
                                                        href="javascript:void(0);" comorbidity="dizziness"
-                                                       onclick="handleActivation(this);">Dizziness</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector"
+                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Acute Myocardial Infarction</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
                                                        href="javascript:void(0);" comorbidity="seizure"
-                                                       onclick="handleActivation(this);">Seizure</a></li>
+                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Hypertension</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">CVD</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">End stage renal disease</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Renal Failure</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Amputation</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Obstructive pulmonary disease</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Asthma</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Mental illness</a></li>
+                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
+                                                       disabled href="javascript:void(0);" comorbidity=""
+                                                       onclick="void(0);">Mood and anxiety disorder</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -1296,13 +1338,13 @@
                                     <div class="btn-group">
                                         <input type="button" class="btn btn-primary btn-md" id="second-search-button"
                                                value="Search"
-                                               onclick="prepareSendRequest();"/>
+                                               onclick="toggleFilters();prepareSendRequest();"/>
                                         <input type="button" class="btn btn-warning btn-md" value="Clear"
                                                onclick="clearMap();clearFilter();"/>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xs-9" id="map-container">
+                            <div class="col-xs-12" id="map-container">
                                 <div id="legend" style="width:210px;display: none;">
                                     <div style="margin-top:10px;" id="legend-content"></div>
                                 </div>
@@ -1392,8 +1434,8 @@
                                     <select id="disease-chart" style="margin-top:5px;" class="form-control input-sm">
                                         <option value="*">All</option>
                                         <option value="diabetes">Diabetes</option>
-                                        <option value="cardiacarrest">Cardiac Arrest</option>
-                                        <option value="cancer">Cancer</option>
+                                        <option value="cardiacarrest">Cardiovascular Disease</option>
+                                        <option value="cancer">Chronic obstructive pulmonary disease</option>
                                         <option value="hypertension">Hypertension</option>
                                     </select>
                                     <input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw" onclick="sendChartRequest();"/>
@@ -1491,8 +1533,11 @@
     function handleActivation(elem) {
         if ($(elem).hasClass("active")) {
             $(elem).removeClass("active");
+            $(elem).find("img").attr("src","../images/unchecked.png");
         } else {
+            $(elem).find("img").attr("src","../images/checked.png");
             $(elem).addClass("active");
+
         }
     }
     function hideLegend() {
@@ -1507,26 +1552,26 @@
     }
     function toggleFilters() {
         if ($("#filters").is(":visible")) {
-            $("#map-container").css("visibility", "hidden");
-            $("#filters").hide("slide", {direction: "left"}, "slow", function () {
+            $("#filters").hide("slide", {direction: "left"}, "fast", function () {
                 $("#hide-filters-btn").removeClass("btn-warning");
                 $("#hide-filters-btn").addClass("btn-primary");
                 $("#hide-filters-btn").attr("value", "Show Filters");
-                $("#map-container").removeClass("col-xs-9");
-                $("#map-container").addClass("col-xs-12");
-                $("#map-container").css("visibility", "visible");
-                google.maps.event.trigger(map, "resize");
 //                init();
             });
         } else {
-            $("#map-container").css("visibility", "hidden");
-            $("#map-container").removeClass("col-xs-12");
-            $("#map-container").addClass("col-xs-9");
-            $("#filters").show("slide", {direction: "left"}, "slow", function () {
+            $("#filters").show("slide", {direction: "left"}, "fast", function () {
                 $("#hide-filters-btn").addClass("btn-warning");
                 $("#hide-filters-btn").removeClass("btn-primary");
                 $("#hide-filters-btn").attr("value", "Hide Filters");
-                $("#map-container").css("visibility", "visible");
+            });
+        }
+    }
+    function hideFilters() {
+        if ($("#filters").is(":visible")) {
+            $("#filters").hide("slide", {direction: "left"}, "fast", function () {
+                $("#hide-filters-btn").removeClass("btn-warning");
+                $("#hide-filters-btn").addClass("btn-primary");
+                $("#hide-filters-btn").attr("value", "Show Filters");
             });
         }
     }
@@ -1693,6 +1738,7 @@
         });
     }
     function handleRange(elem) {
+        hideFilters();
         var selectedCount = $("#timeline a.selected").size();
         var thisClass = $(elem).attr("class");
 //        prepareSendRequest(1998);
@@ -1735,6 +1781,7 @@
         }
     }
     function prepareSendRequest(timelineDate) {
+        $("#loading-spinner").show();
         var minAge = document.getElementById('minAge').value;
         var maxAge = document.getElementById('maxAge').value;
         var minYear = 0;
@@ -1835,11 +1882,13 @@
                         +"<div class='stats-wrapper'><div class='stats-title'>Standard Deviation:</div><div class='stats-value'>"+parseFloat(ageStddev).toFixed(4)+"</div></div>"
                 $("#age-statistics-container").html(statsHtml);
                 $("#statistics-container").show();
+                $("#loading-spinner").hide();
             },
             error: function (data, status, er) {
                 if (timelineDate === undefined) {
 //                    $("#tabs").unmask("<img height='20px' src='../images/loading.gif'/> Processing...");
                 }
+                $("#loading-spinner").hide();
                 alert("An error occurred. Please try again later.");
 
             }

@@ -1114,11 +1114,20 @@
                 </ul>
                 <div id="tabs-1" style="height:100%">
                     <div class="col-xs-12">
-                        <div class="col-xs-12" id="top-functions">
+                        <div class="col-xs-12" style="z-index:3;" id="top-functions">
                             <div class="col-xs-1">
                                 <input style="margin-top:10px;" type="button" id="hide-filters-btn"
                                        class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
+                            </div>
+                            <div class="text-center" style="margin-bottom: 45px; float:left;margin-left:-20px;">
+                                <div class="btn-group" style="z-index:4;">
+                                    <input type="button" class="btn btn-primary btn-md" id="search-button"
+                                           value="Search"
+                                           onclick="toggleFilters();prepareSendRequest();"/>
+                                    <input type="button" class="btn btn-warning btn-md" value="Clear"
+                                           onclick="clearMap();clearFilter();"/>
+                                </div>
                             </div>
                             <div class="">
                                 <div style="position: absolute; left: 260px; margin-top:10px;">
@@ -1176,15 +1185,6 @@
                         </div>
                         <div class="col-xs-12 top-margin">
                             <div class="col-xs-3" id="filters">
-                                <div class="col-xs-12 text-center" style="margin-bottom: 10px;">
-                                    <div class="btn-group" style="z-index:2;">
-                                        <input type="button" class="btn btn-primary btn-md" id="search-button"
-                                               value="Search"
-                                               onclick="toggleFilters();prepareSendRequest();"/>
-                                        <input type="button" class="btn btn-warning btn-md" value="Clear"
-                                               onclick="clearMap();clearFilter();"/>
-                                    </div>
-                                </div>
                                 <div class="col-xs-12 text-center">
                                     <div id="main-accordion">
                                         <div>

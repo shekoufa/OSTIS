@@ -1124,7 +1124,7 @@
                                 <div class="btn-group" style="z-index:4;">
                                     <input type="button" class="btn btn-primary btn-md" id="search-button"
                                            value="Search"
-                                           onclick="toggleFilters();prepareSendRequest();"/>
+                                           onclick="hideFilters();prepareSendRequest();"/>
                                     <input type="button" class="btn btn-warning btn-md" value="Clear"
                                            onclick="clearMap();clearFilter();"/>
                                 </div>
@@ -1338,7 +1338,7 @@
                                     <div class="btn-group">
                                         <input type="button" class="btn btn-primary btn-md" id="second-search-button"
                                                value="Search"
-                                               onclick="toggleFilters();prepareSendRequest();"/>
+                                               onclick="hideFilters();prepareSendRequest();"/>
                                         <input type="button" class="btn btn-warning btn-md" value="Clear"
                                                onclick="clearMap();clearFilter();"/>
                                     </div>

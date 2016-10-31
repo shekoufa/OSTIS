@@ -1,0 +1,4 @@
+* use multivalues
+* check data import handler for importing rdbms
+* request metadata for actual dataset from oliver (for a better and more standard conversion)
+* 

@@ -2,6 +2,7 @@ package com.howtodoinjava.controller;
 
 import com.howtodoinjava.entity.History;
 import com.howtodoinjava.entity.QuestionEntity;
+import com.howtodoinjava.entity.SolrFieldNames;
 import com.howtodoinjava.entity.UserEntity;
 import com.howtodoinjava.service.QuestionManager;
 import com.howtodoinjava.service.UserManager;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  * Created by Yasaman on 2015-10-21.
  */
 public class MapAction extends ActionSupport implements Preparable {
-
+    private static final String CARDIOVASCULARDISEASE = "cardiacarrest";
     private String facetfieldStr;
     private String facetfieldStr1;
     private String facetfieldStr2;
@@ -44,6 +45,7 @@ public class MapAction extends ActionSupport implements Preparable {
     private History history2;
     private TreeMap<String, HashMap<String, Integer>> finalChartResult;
     private String statsObjectStr;
+
 
     @Override
     public void prepare() throws Exception {
@@ -118,7 +120,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[4]="55FF00";
         colorsGradient[5]="00FF15";
 //        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
         SolrQuery query = new SolrQuery();
         if(firstHistory.getComorbidity().length()==0){
             comorbidity="*";
@@ -340,6 +342,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendRequest() throws SolrServerException {
+        SolrFieldNames fieldNames = new SolrFieldNames();
         String[] colorsGradient = new String[6];
         String[] colorsDescription = new String[6];
         colorsGradient[0]="FF0000";
@@ -350,7 +353,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[5]="00FF15";
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
         SolrQuery query = new SolrQuery();
         if(comorbidity.length()==0){
             comorbidity="*";
@@ -369,29 +372,37 @@ public class MapAction extends ActionSupport implements Preparable {
             maxAge=200;
         }
         if(minYear==null){
-            minYear=1000;
+            minYear=1995;
         }
         if(maxYear==null){
-            maxYear=4000;
+            maxYear=2014;
         }
-        query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
-                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
+        /*query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND "+ SolrFieldNames.AGE+":["+minAge+" TO "+maxAge+"] " +
+                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);*/
+        StringBuffer diseaseComponents = new StringBuffer("");
+        if(disease.contains(CARDIOVASCULARDISEASE)){
+            String cvdStatusField = fieldNames.getCVD_STATUS();
+            diseaseComponents.append("(").append(cvdStatusField).append(":1)");
+        }
+        String theQueryString = diseaseComponents.toString() + " AND " + SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
+                "AND " + SolrFieldNames.SEX + ":" + sex;
+        query.set("q", theQueryString);
         query.setFacet(true);
-        query.addFacetField("postal_code_5");
+        query.addFacetField("fsa");
         query.setFacetLimit(-1);
         query.setFacetMinCount(1);
         query.setFacetSort("count");
         query.setStart(0);
         query.set("defType", "edismax");
         query.setGetFieldStatistics(true);
-        query.setGetFieldStatistics("age");
+        query.setGetFieldStatistics(SolrFieldNames.AGE);
 
         QueryResponse response = solr.query(query);
-        FacetField ff = response.getFacetField("postal_code_5");
+        FacetField ff = response.getFacetField(SolrFieldNames.FSA_POSTAL_CODE);
         JSONArray facetfield = new JSONArray();
         System.out.println(query.toString());
         System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
-        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get("age");
+        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
         List<FacetField.Count> facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
             long highestCount = facetEntries.get(1).getCount();
@@ -456,7 +467,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendBubbleChartReuqest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -487,7 +498,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendDifferentDiseasesRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -518,7 +529,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendAgeGroupRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
         String key1= "20-40";
         String key2= "41-60";
         String key3= "61-80";

@@ -1115,7 +1115,7 @@
                 <div id="tabs-1" style="height:100%">
                     <div class="col-xs-12">
                         <div class="col-xs-12" style="z-index:3;" id="top-functions">
-                            <div class="col-xs-1">
+                            <div class="col-xs-1" style="margin-left: -15px; margin-right: 25px;">
                                 <input style="margin-top:10px;" type="button" id="hide-filters-btn"
                                        class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
@@ -1124,7 +1124,7 @@
                                 <div class="btn-group" style="z-index:4;">
                                     <input type="button" class="btn btn-primary btn-md" id="search-button"
                                            value="Search"
-                                           onclick="toggleFilters();prepareSendRequest();"/>
+                                           onclick="hideFilters();prepareSendRequest();"/>
                                     <input type="button" class="btn btn-warning btn-md" value="Clear"
                                            onclick="clearMap();clearFilter();"/>
                                 </div>
@@ -1198,31 +1198,28 @@
                                                        disease="diabetes"><img src="../images/unchecked.png"/> Diabetes</a></li>
                                                 <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="cardiacarrest"><img src="../images/unchecked.png"/> Cardiovascular Disease</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
                                                        disease="cancer"><img src="../images/unchecked.png"/> Obstructive pulmonary disease</a></li>
                                                 <li><a class="disease-selector functional" style="text-decoration: none;"
                                                        href="javascript:void(0);" onclick="handleActivation(this);"
                                                        disease="hypertension"><img src="../images/unchecked.png"/> Hypertension</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="mentalillness">Mental illness</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="anxiety">Mood and anxiety disorders</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="asthma">Asthma</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="ischemic-heartdisease">Ischemic Heart Disease</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="myocardial">Acute Myocardial Infarction</a></li>
-                                                <li><a class="non-functional" disabled style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="void(0);"
-                                                       disease="heart-failure">Heart Failure</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="mentalillness"><img src="../images/unchecked.png"/> Mental illness</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="anxiety"><img src="../images/unchecked.png"/> Mood and anxiety disorders</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="asthma"><img src="../images/unchecked.png"/> Asthma</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="ischemic-heartdisease"><img src="../images/unchecked.png"/> Ischemic Heart Disease</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="myocardial"><img src="../images/unchecked.png"/> Acute Myocardial Infarction</a></li>
+                                                <li><a class="disease-selector functional" style="text-decoration: none;"
+                                                       href="javascript:void(0);" onclick="handleActivation(this);"
+                                                       disease="heart-failure"><img src="../images/unchecked.png"/> Heart Failure</a></li>
                                             </ul>
                                         </div>
                                         <h3>Year</h3>
@@ -1338,7 +1335,7 @@
                                     <div class="btn-group">
                                         <input type="button" class="btn btn-primary btn-md" id="second-search-button"
                                                value="Search"
-                                               onclick="toggleFilters();prepareSendRequest();"/>
+                                               onclick="hideFilters();prepareSendRequest();"/>
                                         <input type="button" class="btn btn-warning btn-md" value="Clear"
                                                onclick="clearMap();clearFilter();"/>
                                     </div>

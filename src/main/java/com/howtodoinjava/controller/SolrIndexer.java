@@ -13,7 +13,7 @@ import java.util.Random;
  * Created by ns265 on 1/28/2016.
  */
 public class SolrIndexer {
-
+    public static final String SOLR_SERVER = "http://ostis.med.mun.ca:8983/solr/newostis";
     public static void main(String[] args) throws IOException, SolrServerException {
         Random randomGenerator = new Random();
         String zipRegions = "A0A,A0B,A0C,A0E,A0G,A0H,A0J,A0K,A0L,A0M,A0N,A0P,A0R,A1A,A1B,A1C,A1E,A1G,A1H,A1K,A1L,A1M,A1N,A1S,A1V,A1W,A1X,A1Y,A2A,A2B,A2H,A2N,A2V,A5A,A8A";
@@ -29,7 +29,7 @@ public class SolrIndexer {
         String[] complicationArray = complicationsStr.split(",");
         String[] healthcareUtilizationArray = healthcareUtilizationStr.split(",");
         String[] mortalityArray = mortalityStr.split(",");
-        HttpSolrServer server = new HttpSolrServer("http://localhost:8983/solr/ostis");
+        HttpSolrServer server = new HttpSolrServer(SOLR_SERVER);
         for (int i = 1914351; i < 1944304; i++) {
             String postalCode = zipRegionsArray[randomGenerator.nextInt(zipRegionsArray.length)] + " 3K8";
             Integer age = randomGenerator.nextInt((99 - 20) + 1) + 20;

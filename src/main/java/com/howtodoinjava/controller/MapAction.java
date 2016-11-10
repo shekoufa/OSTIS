@@ -1,10 +1,8 @@
 package com.howtodoinjava.controller;
 
 import com.howtodoinjava.entity.History;
-import com.howtodoinjava.entity.QuestionEntity;
 import com.howtodoinjava.entity.SolrFieldNames;
 import com.howtodoinjava.entity.UserEntity;
-import com.howtodoinjava.service.QuestionManager;
 import com.howtodoinjava.service.UserManager;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.Preparable;
@@ -15,10 +13,8 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.apache.struts2.ServletActionContext;
-import org.hibernate.Hibernate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +28,16 @@ import java.util.logging.Logger;
  */
 public class MapAction extends ActionSupport implements Preparable {
     private static final String CARDIOVASCULARDISEASE = "cardiacarrest";
+    private static final String DIABETES = "diabetes";
+    private static final String OBSTRUCTIVE_PULMONARY_DISEASE = "cancer";
+    private static final String HYPERTENSION = "hypertension";
+    private static final String MENTALILLNESS = "mentalillness";
+    private static final String MOOD_ANXIETY_DISORDERS = "anxiety";
+    private static final String ASTHMA = "asthma";
+    private static final String ISCHEMIC_HEART_DISEASE = "ischemic-heartdisease";
+    private static final String ACUTE_MYOCARDIAL_INFARCTION = "myocardial";
+    private static final String HEART_FAILURE = "heart-failure";
+    public static final String SOLR_SERVER = "http://ostis.med.mun.ca:8983/solr/newostis";
     private String facetfieldStr;
     private String facetfieldStr1;
     private String facetfieldStr2;
@@ -120,7 +126,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[4]="55FF00";
         colorsGradient[5]="00FF15";
 //        HttpSolrServer solr = new HttpSolrServer("http://134.153.89.205:8983/solr/ostis");
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
+        HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
         SolrQuery query = new SolrQuery();
         if(firstHistory.getComorbidity().length()==0){
             comorbidity="*";
@@ -353,7 +359,7 @@ public class MapAction extends ActionSupport implements Preparable {
         colorsGradient[5]="00FF15";
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
+        HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
         SolrQuery query = new SolrQuery();
         if(comorbidity.length()==0){
             comorbidity="*";
@@ -379,12 +385,82 @@ public class MapAction extends ActionSupport implements Preparable {
         }
         /*query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND "+ SolrFieldNames.AGE+":["+minAge+" TO "+maxAge+"] " +
                 "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);*/
-        StringBuffer diseaseComponents = new StringBuffer("");
-        if(disease.contains(CARDIOVASCULARDISEASE)){
-            String cvdStatusField = fieldNames.getCVD_STATUS();
-            diseaseComponents.append("(").append(cvdStatusField).append(":1)");
+        StringBuffer diseaseComponents = new StringBuffer("(");
+        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE)){
+            String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
         }
-        String theQueryString = diseaseComponents.toString() + " AND " + SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
+        if(disease.contains(DIABETES)){
+            if(diseaseComponents.toString().length() > 1) {
+                //TODO: should this be OR or AND or USER_SPECIFIED?
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getDIABETES_DIAGNOSIS_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(HYPERTENSION)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHYP_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(MENTALILLNESS)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getOMNI_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(MOOD_ANXIETY_DISORDERS)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getANXIETY_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(ASTHMA)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getASTHMA_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(ISCHEMIC_HEART_DISEASE)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getIHD_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getAMI_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains(HEART_FAILURE)){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHF_DIAGNOSTIC_YEAR();
+            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]");
+        }
+        if(disease.contains("*")){
+            diseaseComponents.append("*");
+        }
+        diseaseComponents.append(")");
+        String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
                 "AND " + SolrFieldNames.SEX + ":" + sex;
         query.set("q", theQueryString);
         query.setFacet(true);
@@ -467,7 +543,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendBubbleChartReuqest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
+        HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -498,7 +574,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendDifferentDiseasesRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
+        HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
@@ -529,7 +605,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String sendAgeGroupRequest() throws SolrServerException {
-        HttpSolrServer solr = new HttpSolrServer("http://localhost:8983/solr/newostis");
+        HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
         String key1= "20-40";
         String key2= "41-60";
         String key3= "61-80";

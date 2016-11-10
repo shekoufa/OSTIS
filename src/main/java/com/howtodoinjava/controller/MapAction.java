@@ -388,8 +388,10 @@ public class MapAction extends ActionSupport implements Preparable {
         StringBuffer diseaseComponents = new StringBuffer("(");
         if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE)){
             String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getOPD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(DIABETES)){
             if(diseaseComponents.toString().length() > 1) {
@@ -397,64 +399,80 @@ public class MapAction extends ActionSupport implements Preparable {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getDIABETES_DIAGNOSIS_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getDIABETES_DIAGNOSIS_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(HYPERTENSION)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getHYP_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getHYP_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(MENTALILLNESS)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getOMNI_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getOMNI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(MOOD_ANXIETY_DISORDERS)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getANXIETY_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getANXIETY_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(ASTHMA)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getASTHMA_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getASTHMA_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(ISCHEMIC_HEART_DISEASE)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getIHD_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getIHD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getAMI_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getAMI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains(HEART_FAILURE)){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
             String diagYearField = fieldNames.getHF_DIAGNOSTIC_YEAR();
-            diseaseComponents.append(diagYearField).append(":[ ").append(minYear).append(" TO ")
-                    .append(maxYear).append(" ]");
+            String diagAgeField = fieldNames.getHF_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
         if(disease.contains("*")){
             diseaseComponents.append("*");

@@ -36,7 +36,7 @@
     <link rel="stylesheet" href="../css/timeline-style.css" type="text/css">
     <link rel="stylesheet" href="../css/reset.css" type="text/css">
     <link rel="stylesheet" href="../css/menu-style.css" type="text/css">
-    <link rel="stylesheet" href="../css/sweet-alert.css" type="text/css">
+    <link rel="stylesheet" href="../css/sweetalert.css" type="text/css">
     <!-- end -->
 
     <!-- bin/jquery.slider.min.js -->
@@ -59,7 +59,7 @@
     <script type="text/javascript" src="../js/cron.js"></script> <!-- Resource jQuery -->
     <script type="text/javascript" src="../js/jquery.timelinr-0.9.6.js"></script> <!-- Resource jQuery -->
     <script type="text/javascript" src="../js/menu-main.js"></script> <!-- Resource jQuery -->
-    <script type="text/javascript" src="../js/sweet-alert.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/sweetalert.min.js"></script> <!-- Resource jQuery -->
 
     <%--<script type="text/javascript" src="../js/jquery.easing.1.3.js"></script> <!-- Resource jQuery -->--%>
     <%--<script type="text/javascript" src="../js/jquery.easing.compatibility.js"></script> <!-- Resource jQuery -->--%>
@@ -368,7 +368,7 @@
         }
         function setInfoWindow(feature) {
             google.maps.event.addListener(feature, "click", function (event) {
-                var content = "<div id='infoBox'><strong>Results in this area:</strong><br />";
+                var content = "<div id=''><strong>Results in this area:</strong><br />";
                 var postalcode = "";
                 for (var j in this.geojsonProperties) {
                     if (j == "Postal Code") {
@@ -382,10 +382,22 @@
                         }
                     }
                 }
-                content += "<button id='show-in-table-btn' style='margin-top:5px;' onclick='scrollToId(\"ROW-" + postalcode + "\");' class='btn-xs btn btn-info'>Show in table</button> </div>";
                 infowindow.setContent(content);
                 infowindow.setPosition(event.latLng);
-                infowindow.open(map);
+                console.log(content);
+                swal({
+                    title: "",
+                    text: content,
+                    html: true,
+                    showCancelButton: true,
+                    confirmButtonColor: "#286090",
+                    confirmButtonText: "Show in table",
+                    closeOnConfirm: true
+                },
+                function () {
+                    scrollToId("ROW-" + postalcode);
+                });
+//                infowindow.open(map);
             });
         }
         function setInfoWindow1(feature) {
@@ -1937,6 +1949,7 @@
         $("#table-container").html(tableStr);
     }
     function scrollToId(theId) {
+        console.log(theId);
         var container = $("body");
         var scrollTo = $("#" + theId);
         $("#table-container tr").removeClass("scrolled");

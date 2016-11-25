@@ -46,8 +46,10 @@ input{
 }
 
 #infoBox {
+    position: fixed;
     width: 300px;
     color: black;
+    z-index: 1000;
 }
 #tabs{
     height: 100%;

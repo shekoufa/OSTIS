@@ -1,6 +1,7 @@
 package com.howtodoinjava.dao;
 
 import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.Settings;
 import com.howtodoinjava.entity.UserEntity;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,4 +24,6 @@ public interface UserDAO {
     List<History> findHistoryByUserId(Integer userId);
 
     History findHistoryById(Integer historyId);
+    void update(UserEntity user);
+    void update(Settings settings);
 }

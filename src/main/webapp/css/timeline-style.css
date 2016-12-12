@@ -23,7 +23,7 @@ a.second-selected {
 }
 
 #timeline {
-    width: 800px;
+    width: 92%;
     height: 36px;
     overflow: hidden;
     margin: 5px auto;
@@ -34,7 +34,6 @@ a.second-selected {
 }
 
 #dates {
-    width: 800px;
     height: 60px;
     overflow: hidden;
 }
@@ -42,7 +41,7 @@ a.second-selected {
 #dates li {
     list-style: none;
     float: left;
-    width: 70px;
+    width: 4.7%;
     height: 50px;
     font-size: 14px;
     text-align: center;

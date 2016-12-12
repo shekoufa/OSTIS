@@ -53,4 +53,10 @@ public class UserManagerImpl implements UserManager{
     public History findHistoryById(Integer historyId) {
         return userDAO.findHistoryById(historyId);
     }
+
+    @Override
+    @Transactional
+    public void updateUser(UserEntity user) {
+        userDAO.update(user);
+    }
 }

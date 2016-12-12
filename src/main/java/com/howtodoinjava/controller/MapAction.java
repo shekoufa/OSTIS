@@ -1,6 +1,7 @@
 package com.howtodoinjava.controller;
 
 import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.Settings;
 import com.howtodoinjava.entity.SolrFieldNames;
 import com.howtodoinjava.entity.UserEntity;
 import com.howtodoinjava.service.UserManager;
@@ -15,12 +16,15 @@ import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.util.NamedList;
 import org.apache.struts2.ServletActionContext;
+import org.hibernate.Hibernate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -51,6 +55,9 @@ public class MapAction extends ActionSupport implements Preparable {
     private History history2;
     private TreeMap<String, HashMap<String, Integer>> finalChartResult;
     private String statsObjectStr;
+    private Settings settings;
+
+
 
 
     @Override
@@ -86,6 +93,13 @@ public class MapAction extends ActionSupport implements Preparable {
 //        questionEntity = questionManager.findNextQuestion();
         return SUCCESS;
     }
+    public String showSettings(){
+        logger.info("Showing main page with map and stuffs");
+        UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
+        settings = user.getSettings();
+        return SUCCESS;
+    }
+
     public String history1Details(){
         history1 = userManager.findHistoryById(historyId1);
         return SUCCESS;
@@ -115,6 +129,7 @@ public class MapAction extends ActionSupport implements Preparable {
         return SUCCESS;
     }
     public String compare() throws SolrServerException {
+        UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
         History firstHistory = userManager.findHistoryById(historyId1);
         History secondHistory = userManager.findHistoryById(historyId2);
         String[] colorsGradient = new String[6];
@@ -149,46 +164,135 @@ public class MapAction extends ActionSupport implements Preparable {
             maxAge = firstHistory.getMaxAge();
         }
         if(firstHistory.getMinYear()==null){
-            minYear=1000;
+            minYear=1995;
         }else{
             minYear = firstHistory.getMinYear();
         }
         if(firstHistory.getMaxYear()==null){
-            maxYear=4000;
+            maxYear=2015;
         }else{
             maxYear = firstHistory.getMaxYear();
         }
-        if(firstHistory.getHealthCareUtilization().equals("0")){
-            healthcare = "0";
-        }else if(firstHistory.getHealthCareUtilization().equals("1")){
-            healthcare = "1";
+        if(firstHistory.getSex() == null){
+            sex = "*";
+        }else{
+            sex = firstHistory.getSex();
         }
-        if(firstHistory.getMortality().equals("0")){
-            mortality = "0";
-        }else if(firstHistory.getMortality().equals("1")){
-            mortality = "1";
+        /*query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND "+ SolrFieldNames.AGE+":["+minAge+" TO "+maxAge+"] " +
+                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);*/
+        SolrFieldNames fieldNames = new SolrFieldNames();
+        StringBuffer diseaseComponents = new StringBuffer("(");
+        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE) || disease.contains("*")){
+            String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOPD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(firstHistory.getSex().equals("M")){
-            sex = "M";
-        }else if(firstHistory.getSex().equals("F")){
-            sex = "F";
+        if(disease.contains(DIABETES) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                //TODO: should this be OR or AND or USER_SPECIFIED?
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getDIABETES_DIAGNOSIS_YEAR();
+            String diagAgeField = fieldNames.getDIABETES_DIAGNOSIS_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(HYPERTENSION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHYP_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHYP_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MENTALILLNESS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getOMNI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOMNI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MOOD_ANXIETY_DISORDERS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getANXIETY_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getANXIETY_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ASTHMA) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getASTHMA_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getASTHMA_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ISCHEMIC_HEART_DISEASE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getIHD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getIHD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getAMI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getAMI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(HEART_FAILURE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHF_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHF_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
 
-        query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
-                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
+        diseaseComponents.append(")");
+        String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
+                "AND " + SolrFieldNames.SEX + ":" + sex;
+        query.set("q",theQueryString);
         query.setFacet(true);
-        query.addFacetField("postal_code_5");
+        query.addFacetField("fsa");
         query.setFacetLimit(-1);
         query.setFacetMinCount(1);
         query.setFacetSort("count");
         query.setStart(0);
         query.set("defType", "edismax");
+        query.setGetFieldStatistics(true);
+        query.setGetFieldStatistics(SolrFieldNames.AGE);
 
 
         QueryResponse response = solr.query(query);
-        FacetField ff = response.getFacetField("postal_code_5");
+        FacetField ff = response.getFacetField(SolrFieldNames.FSA_POSTAL_CODE);
         JSONArray facetfield = new JSONArray();
-
+        System.out.println(query.toString());
+        System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
+        //TODO: We have some results without a FSA value in the response. They will be bucketed under empty string.
+        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
         List<FacetField.Count> facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
             long highestCount = facetEntries.get(1).getCount();
@@ -259,48 +363,137 @@ public class MapAction extends ActionSupport implements Preparable {
             maxAge = secondHistory.getMaxAge();
         }
         if(secondHistory.getMinYear()==null){
-            minYear=1000;
+            minYear=1995;
         }else{
             minYear = secondHistory.getMinYear();
         }
         if(secondHistory.getMaxYear()==null){
-            maxYear=4000;
+            maxYear=2015;
         }else{
             maxYear = secondHistory.getMaxYear();
         }
-        if(secondHistory.getHealthCareUtilization().equals("0")){
-            healthcare = "0";
-        }else if(secondHistory.getHealthCareUtilization().equals("1")){
-            healthcare = "1";
+        if(secondHistory.getSex() == null){
+            sex = "*";
+        }else{
+            sex = secondHistory.getSex();
         }
-        if(secondHistory.getMortality().equals("0")){
-            mortality = "0";
-        }else if(secondHistory.getMortality().equals("1")){
-            mortality = "1";
+        /*query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND "+ SolrFieldNames.AGE+":["+minAge+" TO "+maxAge+"] " +
+                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);*/
+        diseaseComponents = new StringBuffer("(");
+        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE) || disease.contains("*")){
+            String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOPD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(secondHistory.getSex().equals("M")){
-            sex = "M";
-        }else if(secondHistory.getSex().equals("F")){
-            sex = "F";
+        if(disease.contains(DIABETES) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                //TODO: should this be OR or AND or USER_SPECIFIED?
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getDIABETES_DIAGNOSIS_YEAR();
+            String diagAgeField = fieldNames.getDIABETES_DIAGNOSIS_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
         }
-        query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND age:["+minAge+" TO "+maxAge+"] " +
-                "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);
+        if(disease.contains(HYPERTENSION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHYP_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHYP_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MENTALILLNESS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getOMNI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOMNI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MOOD_ANXIETY_DISORDERS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getANXIETY_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getANXIETY_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ASTHMA) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getASTHMA_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getASTHMA_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ISCHEMIC_HEART_DISEASE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getIHD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getIHD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getAMI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getAMI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(HEART_FAILURE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHF_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHF_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+
+        diseaseComponents.append(")");
+        theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
+                "AND " + SolrFieldNames.SEX + ":" + sex;
+        query.set("q",theQueryString);
         query.setFacet(true);
-        query.addFacetField("postal_code_5");
+        query.addFacetField("fsa");
         query.setFacetLimit(-1);
         query.setFacetMinCount(1);
         query.setFacetSort("count");
         query.setStart(0);
         query.set("defType", "edismax");
+        query.setGetFieldStatistics(true);
+        query.setGetFieldStatistics(SolrFieldNames.AGE);
 
 
         response = solr.query(query);
-        ff = response.getFacetField("postal_code_5");
+        ff = response.getFacetField(SolrFieldNames.FSA_POSTAL_CODE);
         facetfield = new JSONArray();
-
+        System.out.println(query.toString());
+        System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
+        //TODO: We have some results without a FSA value in the response. They will be bucketed under empty string.
+        statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
         facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
-            long highestCount = facetEntries.get(1).getCount();
+            long highestCount = facetEntries.get(0).getCount();
             long lowestCount = facetEntries.get(facetEntries.size() - 1).getCount();
             Double distanceDouble = Math.ceil((highestCount - lowestCount+1) / 6);
             int distance = distanceDouble.intValue();
@@ -347,16 +540,63 @@ public class MapAction extends ActionSupport implements Preparable {
         }
         return SUCCESS;
     }
-    public String sendRequest() throws SolrServerException {
+    public Color hex2Rgb(String colorStr) {
+        return new Color(
+                Integer.valueOf( colorStr.substring( 1, 3 ), 16 ),
+                Integer.valueOf( colorStr.substring( 3, 5 ), 16 ),
+                Integer.valueOf( colorStr.substring( 5, 7 ), 16 ) );
+    }
+    public Color bleach(Color color, float amount)
+    {
+        int red = (int) ((color.getRed() * (1 - amount) / 255 + amount) * 255);
+        int green = (int) ((color.getGreen() * (1 - amount) / 255 + amount) * 255);
+        int blue = (int) ((color.getBlue() * (1 - amount) / 255 + amount) * 255);
+        return new Color(red, green, blue);
+    }
+    public String sendMyRequest() throws SolrServerException {
+        UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
         SolrFieldNames fieldNames = new SolrFieldNames();
         String[] colorsGradient = new String[6];
         String[] colorsDescription = new String[6];
-        colorsGradient[0]="FF0000";
-        colorsGradient[1]="FF6A00";
-        colorsGradient[2]="FFD400";
-        colorsGradient[3]="BFFF00";
-        colorsGradient[4]="55FF00";
-        colorsGradient[5]="00FF15";
+        Hibernate.initialize(user.getUserroles());
+        Hibernate.initialize(user.getSettings());
+        String prevalenceColor = user.getSettings().getPrevalenceColor();
+        if(prevalenceColor.equalsIgnoreCase("default")){
+            colorsGradient[0]="FF0000";
+            colorsGradient[1]="FF6A00";
+            colorsGradient[2]="FFD400";
+            colorsGradient[3]="BFFF00";
+            colorsGradient[4]="55FF00";
+            colorsGradient[5]="00FF15";
+        }else if(prevalenceColor.equalsIgnoreCase("reverse")){
+            colorsGradient[5]="FF0000";
+            colorsGradient[4]="FF6A00";
+            colorsGradient[3]="FFD400";
+            colorsGradient[2]="BFFF00";
+            colorsGradient[1]="55FF00";
+            colorsGradient[0]="00FF15";
+        }else{
+            Color color = hex2Rgb(prevalenceColor);
+            String hex = String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+            colorsGradient[0]=hex;
+            Color color1 = bleach(color, 0.17f);
+            hex = String.format("%02x%02x%02x", color1.getRed(), color1.getGreen(), color1.getBlue());
+            colorsGradient[1]=hex;
+            Color color2 = bleach(color, .38f);
+            hex = String.format("%02x%02x%02x", color2.getRed(), color2.getGreen(), color2.getBlue());
+            colorsGradient[2]=hex;
+            Color color3 = bleach(color, .59f);
+            hex = String.format("%02x%02x%02x", color3.getRed(), color3.getGreen(), color3.getBlue());
+            colorsGradient[3]=hex;
+            Color color4 = bleach(color, .80f);
+            hex = String.format("%02x%02x%02x", color4.getRed(), color4.getGreen(), color4.getBlue());
+            colorsGradient[4]=hex;
+            Color color5 = bleach(color, .97f);
+            hex = String.format("%02x%02x%02x", color5.getRed(), color5.getGreen(), color5.getBlue());
+            colorsGradient[5]=hex;
+        }
+
+
         System.out.println("********---------********");
         System.out.println("Before running the query: "+new Timestamp(System.currentTimeMillis()));
         HttpSolrServer solr = new HttpSolrServer(SOLR_SERVER);
@@ -386,14 +626,14 @@ public class MapAction extends ActionSupport implements Preparable {
         /*query.set("q","complications:("+comorbidity+") AND disease_type:("+disease+") AND "+ SolrFieldNames.AGE+":["+minAge+" TO "+maxAge+"] " +
                 "AND year:["+minYear+" TO "+maxYear+"] AND sex:"+sex+" AND healthcare:"+healthcare+" AND mortality:"+mortality);*/
         StringBuffer diseaseComponents = new StringBuffer("(");
-        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE)){
+        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE) || disease.contains("*")){
             String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
             String diagAgeField = fieldNames.getOPD_DIAGNOSTIC_AGE();
             diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(DIABETES)){
+        if(disease.contains(DIABETES) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 //TODO: should this be OR or AND or USER_SPECIFIED?
                 diseaseComponents.append(" OR ");
@@ -404,7 +644,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(HYPERTENSION)){
+        if(disease.contains(HYPERTENSION) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -414,7 +654,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(MENTALILLNESS)){
+        if(disease.contains(MENTALILLNESS) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -424,7 +664,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(MOOD_ANXIETY_DISORDERS)){
+        if(disease.contains(MOOD_ANXIETY_DISORDERS) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -434,7 +674,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(ASTHMA)){
+        if(disease.contains(ASTHMA) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -444,7 +684,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(ISCHEMIC_HEART_DISEASE)){
+        if(disease.contains(ISCHEMIC_HEART_DISEASE) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -454,7 +694,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION)){
+        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -464,7 +704,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains(HEART_FAILURE)){
+        if(disease.contains(HEART_FAILURE) || disease.contains("*")){
             if(diseaseComponents.toString().length() > 1) {
                 diseaseComponents.append(" OR ");
             }
@@ -474,9 +714,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
                     .append(" TO ").append(maxAge).append("]").append(")");
         }
-        if(disease.contains("*")){
-            diseaseComponents.append("*");
-        }
+
         diseaseComponents.append(")");
         String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
                 "AND " + SolrFieldNames.SEX + ":" + sex;
@@ -496,10 +734,11 @@ public class MapAction extends ActionSupport implements Preparable {
         JSONArray facetfield = new JSONArray();
         System.out.println(query.toString());
         System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
+        //TODO: We have some results without a FSA value in the response. They will be bucketed under empty string.
         FieldStatsInfo statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
         List<FacetField.Count> facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
-            long highestCount = facetEntries.get(1).getCount();
+            long highestCount = facetEntries.get(0).getCount();
             long lowestCount = facetEntries.get(facetEntries.size() - 1).getCount();
             Double distanceDouble = Math.ceil((highestCount - lowestCount+1) / 6);
             int distance = distanceDouble.intValue();
@@ -574,21 +813,7 @@ public class MapAction extends ActionSupport implements Preparable {
         query.set("defType", "edismax");
         QueryResponse response = solr.query(query);
         NamedList<List<PivotField>> pivot = response.getFacetPivot();
-//        for (Map.Entry<String, List<PivotField>> pivotList : pivot) {
-//            String key = pivotList.getKey();
-//            List<PivotField> values = pivotList.getValue();
-//            for (PivotField value : values) {
-//                PivotField yearDiseasePivotField = value;
-//                Integer yearValue = (Integer)yearDiseasePivotField.getValue();
-//                HashMap<String, Integer> diseaseIntensity = new HashMap<String, Integer>();
-//                for (int i = 0;i<4; i++){
-//                    String diseaseName = (String) yearDiseasePivotField.getPivot().get(i).getValue();
-//                    Integer diseaseCount = (Integer) yearDiseasePivotField.getPivot().get(i).getCount();
-//                    diseaseIntensity.put(diseaseName,diseaseCount);
-//                }
-//                finalChartResult.put(yearValue+"",diseaseIntensity);
-//            }
-//        }
+
         return SUCCESS;
     }
     public String sendDifferentDiseasesRequest() throws SolrServerException {
@@ -631,10 +856,103 @@ public class MapAction extends ActionSupport implements Preparable {
         SolrQuery query = new SolrQuery();
         HashMap<Integer, HashMap<String, Integer>> chartResult = new HashMap<Integer, HashMap<String, Integer>>();
         finalChartResult = new TreeMap<String, HashMap<String, Integer>>();
-        query.set("q","disease_type:"+disease);
+        SolrFieldNames fieldNames = new SolrFieldNames();
+        StringBuffer diseaseComponents = new StringBuffer("(");
+        if(disease.contains(OBSTRUCTIVE_PULMONARY_DISEASE) || disease.contains("*")){
+            String diagYearField = fieldNames.getOPD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOPD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(DIABETES) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                //TODO: should this be OR or AND or USER_SPECIFIED?
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getDIABETES_DIAGNOSIS_YEAR();
+            String diagAgeField = fieldNames.getDIABETES_DIAGNOSIS_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(HYPERTENSION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHYP_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHYP_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MENTALILLNESS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getOMNI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getOMNI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(MOOD_ANXIETY_DISORDERS) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getANXIETY_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getANXIETY_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ASTHMA) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getASTHMA_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getASTHMA_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ISCHEMIC_HEART_DISEASE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getIHD_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getIHD_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(ACUTE_MYOCARDIAL_INFARCTION) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getAMI_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getAMI_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+        if(disease.contains(HEART_FAILURE) || disease.contains("*")){
+            if(diseaseComponents.toString().length() > 1) {
+                diseaseComponents.append(" OR ");
+            }
+            String diagYearField = fieldNames.getHF_DIAGNOSTIC_YEAR();
+            String diagAgeField = fieldNames.getHF_DIAGNOSTIC_AGE();
+            diseaseComponents.append("(").append(diagYearField).append(":[ ").append(minYear).append(" TO ")
+                    .append(maxYear).append(" ]").append(" AND ").append(diagAgeField).append(":[").append(minAge)
+                    .append(" TO ").append(maxAge).append("]").append(")");
+        }
+
+        diseaseComponents.append(")");
+        String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" " :"");
+        query.set("q", theQueryString);
         query.setFacet(true);
-        query.addFacetPivotField("age,sex");
-        query.setFacetSort("age desc");
+        query.addFacetPivotField("Age_MidYear,sex");
+        query.setFacetSort("Age_MidYear desc");
 //        query.setFacetSort("count");
         query.setStart(0);
         query.set("defType", "edismax");
@@ -646,20 +964,39 @@ public class MapAction extends ActionSupport implements Preparable {
             for (PivotField value : values) {
                 PivotField ageSexPivotField = value;
                 Integer ageValue = (Integer)ageSexPivotField.getValue();
-                String sexDecider = (String) ageSexPivotField.getPivot().get(0).getValue();
                 Integer maleValue = 0;
                 Integer femaleValue = 0;
-                if(sexDecider.equalsIgnoreCase("m")){
-                    maleValue = ageSexPivotField.getPivot().get(0).getCount();
+                if(ageSexPivotField.getPivot().size() > 0){
+                    String sexDecider = (String) ageSexPivotField.getPivot().get(0).getValue();
+                    if(sexDecider.equalsIgnoreCase("m")){
+                        maleValue = ageSexPivotField.getPivot().get(0).getCount();
+                    }else{
+                        if(ageSexPivotField.getPivot().size()>1){
+                            femaleValue = ageSexPivotField.getPivot().get(1).getCount();
+                        }else{
+                            femaleValue = 0;
+                        }
+                    }
+                    if(ageSexPivotField.getPivot().size()>1){
+                        sexDecider = (String) ageSexPivotField.getPivot().get(1).getValue();
+                        if(sexDecider.equalsIgnoreCase("m")){
+                            maleValue = ageSexPivotField.getPivot().get(0).getCount();
+                        }else{
+                            if(ageSexPivotField.getPivot().size()>1){
+                                femaleValue = ageSexPivotField.getPivot().get(1).getCount();
+                            }else{
+                                femaleValue = 0;
+                            }
+                        }
+                    }else{
+                        femaleValue = 0;
+                    }
                 }else{
-                    femaleValue = ageSexPivotField.getPivot().get(1).getCount();
+                    maleValue = 0;
+                    femaleValue = 0;
                 }
-                sexDecider = (String) ageSexPivotField.getPivot().get(1).getValue();
-                if(sexDecider.equalsIgnoreCase("m")){
-                    maleValue = ageSexPivotField.getPivot().get(0).getCount();
-                }else{
-                    femaleValue = ageSexPivotField.getPivot().get(1).getCount();
-                }
+
+
                 HashMap<String, Integer> femaleMaleMap = new HashMap<String, Integer>();
                 femaleMaleMap.put("m",maleValue);
                 femaleMaleMap.put("f",femaleValue);
@@ -726,6 +1063,14 @@ public class MapAction extends ActionSupport implements Preparable {
 
             }
         }
+        return SUCCESS;
+    }
+
+    public String saveSettings() throws SolrServerException {
+        UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
+        String theColor = settings.getPrevalenceColor();
+        user.getSettings().setPrevalenceColor(theColor);
+        userManager.updateUser(user);
         return SUCCESS;
     }
     public Integer getMinYear() {
@@ -942,5 +1287,13 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setStatsObjectStr(String statsObjectStr) {
         this.statsObjectStr = statsObjectStr;
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 }

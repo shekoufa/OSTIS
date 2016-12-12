@@ -8,5 +8,6 @@
         <mapping class="com.howtodoinjava.entity.UserEntity" />
         <mapping class="com.howtodoinjava.entity.UserRoleEntity" />
         <mapping class="com.howtodoinjava.entity.History" />
+        <mapping class="com.howtodoinjava.entity.Settings" />
     </session-factory>
 </hibernate-configuration>

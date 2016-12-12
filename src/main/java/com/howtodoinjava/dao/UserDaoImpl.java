@@ -1,9 +1,6 @@
 package com.howtodoinjava.dao;
 
-import com.howtodoinjava.entity.History;
-import com.howtodoinjava.entity.QuestionEntity;
-import com.howtodoinjava.entity.UserEntity;
-import com.howtodoinjava.entity.UserRoleEntity;
+import com.howtodoinjava.entity.*;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -70,6 +67,16 @@ public class UserDaoImpl implements UserDAO {
         Hibernate.initialize(theHistory.getUser());
 //        Hibernate.initialize(theHistory.getUser().getHistoryList());
         return theHistory;
+    }
+
+    @Override
+    public void update(UserEntity user) {
+        this.sessionFactory.getCurrentSession().update(user);
+    }
+
+    @Override
+    public void update(Settings settings) {
+        this.sessionFactory.getCurrentSession().update(settings);
     }
 
 }

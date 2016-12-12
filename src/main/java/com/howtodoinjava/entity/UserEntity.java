@@ -37,6 +37,10 @@ public class UserEntity implements Serializable {
 
     @OneToMany(mappedBy="user", fetch = FetchType.EAGER)
     private List<UserRoleEntity> userroles;
+
+    @OneToOne (cascade=CascadeType.ALL)
+    @JoinColumn(name="SETTINGS_ID")
+    private Settings settings;
 //    @OneToMany(mappedBy="user")
 //    private List<History> historyList;
      
@@ -105,7 +109,15 @@ public class UserEntity implements Serializable {
         this.currquestion = currquestion;
     }
 
-//    public List<History> getHistoryList() {
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
+
+    //    public List<History> getHistoryList() {
 //        return historyList;
 //    }
 

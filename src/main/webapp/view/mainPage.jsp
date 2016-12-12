@@ -18,6 +18,7 @@
     <title>OSTIS - Main Dashboard</title>
     <link rel="stylesheet" href="../css/jquery-ui.min.css" type="text/css">
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/accordion.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="../js/jquery-2.1.4.js"></script>
     <script src="../js/bootstrap.min.js"></script>
@@ -122,19 +123,33 @@
 
 
         }
+        function initCompareCounter() {
+            compareRun = 0;
+        }
         function initCompare() {
+            var latLang = [];
+            var correct = [48.5663, -55.8457];
+            var adjusted = [50.0663, -59.9457];
+            console.log("Now compareRun is: " + compareRun);
+            if (compareRun <= 1) {
+                latLang = adjusted;
+            } else {
+                latLang = correct;
+            }
+
             map1 = new google.maps.Map(document.getElementById('map1'), {
                 zoom: 7,
-                center: new google.maps.LatLng(48.5663, -55.8457),
+                center: new google.maps.LatLng(latLang[0], latLang[1]),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 keyboardShortcuts: false,
 //                disableDefaultUI: true,
                 streetViewControl: false,
                 mapTypeControl: false
             });
+
             map2 = new google.maps.Map(document.getElementById('map2'), {
                 zoom: 7,
-                center: new google.maps.LatLng(48.5663, -55.8457),
+                center: new google.maps.LatLng(latLang[0], latLang[1]),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 keyboardShortcuts: false,
 //                disableDefaultUI: true,
@@ -143,6 +158,7 @@
             });
             $("#compare-clear").click();
             $("#comparemaps-container").hide();
+            compareRun++;
         }
         function hiddenInit() {
             google.maps.event.trigger(map1, "resize");
@@ -151,8 +167,8 @@
             google.maps.event.trigger(map2, "resize");
         }
         function clearFilter() {
-            $(".disease-selector").removeClass("active");
-            $(".comorbidity-selector").removeClass("active");
+            $(".disease-selector").removeClass("active-filter");
+            $(".comorbidity-selector").removeClass("active-filter");
             $("#minYear").val("");
             $("#maxYear").val("");
             $("#minAge").val("");
@@ -384,19 +400,18 @@
                 }
                 infowindow.setContent(content);
                 infowindow.setPosition(event.latLng);
-                console.log(content);
                 swal({
-                    title: "",
-                    text: content,
-                    html: true,
-                    showCancelButton: true,
-                    confirmButtonColor: "#286090",
-                    confirmButtonText: "Show in table",
-                    closeOnConfirm: true
-                },
-                function () {
-                    scrollToId("ROW-" + postalcode);
-                });
+                            title: "",
+                            text: content,
+                            html: true,
+                            showCancelButton: true,
+                            confirmButtonColor: "#286090",
+                            confirmButtonText: "Show in table",
+                            closeOnConfirm: true
+                        },
+                        function () {
+                            scrollToId("ROW-" + postalcode);
+                        });
 //                infowindow.open(map);
             });
         }
@@ -504,7 +519,7 @@
         }
         function sendChartRequest() {
             $.ajax({
-                url: "/sendAgeGroupRequest?disease="+$("#disease-chart").val(),
+                url: "/sendAgeGroupRequest?disease=" + $("#disease-chart").val(),
                 type: 'GET',
                 dataType: 'json',
                 contentType: 'application/json',
@@ -527,23 +542,23 @@
                     femaleArray.push(null);
                     averageArray.push(null);
 
-                    for (var key in info){
+                    for (var key in info) {
                         categoriesArray.push(key);
-                        totalMale+=info[key].m;
-                        totalFemale+=info[key].f;
+                        totalMale += info[key].m;
+                        totalFemale += info[key].f;
                         maleArray.push(info[key].m);
                         femaleArray.push(info[key].f);
-                        var average = ((parseInt(info[key].m)+parseInt(info[key].f))/2);
+                        var average = ((parseInt(info[key].m) + parseInt(info[key].f)) / 2);
                         averageArray.push(average);
                     }
-                    var diseaseText= $("#disease-chart").find("option:selected").text();
-                    if (diseaseText=="All") diseaseText = "All diseases";
+                    var diseaseText = $("#disease-chart").find("option:selected").text();
+                    if (diseaseText == "All") diseaseText = "All diseases";
                     $('#chartcontainer').highcharts({
 //                        chart: {
 //                            type: 'bar'
 //                        },
                         title: {
-                            text: 'Prevalence of \''+diseaseText+'\' per sex for different age groups'
+                            text: 'Prevalence of \'' + diseaseText + '\' per sex for different age groups'
                         },
                         xAxis: {
                             categories: categoriesArray,
@@ -599,7 +614,7 @@
                             data: averageArray
                         }, {
                             type: 'pie',
-                            name: 'Total occurrences for '+diseaseText+' for each sex',
+                            name: 'Total occurrences for ' + diseaseText + ' for each sex',
                             data: [{
                                 name: 'Male',
                                 y: totalMale,
@@ -629,7 +644,7 @@
         }
         function sendDifferentDiseasesRequest() {
             $.ajax({
-                url: "/sendDifferentDiseasesRequest?minYear="+$("#diff_dis_min_year").val()+"&maxYear="+$("#diff_dis_max_year").val(),
+                url: "/sendDifferentDiseasesRequest?minYear=" + $("#diff_dis_min_year").val() + "&maxYear=" + $("#diff_dis_max_year").val(),
                 type: 'GET',
                 dataType: 'json',
                 contentType: 'application/json',
@@ -662,17 +677,17 @@
                     hypertensionArray.push(null);
                     averageArray.push(null);
 
-                    for (var key in info){
+                    for (var key in info) {
                         yearsArray.push(key);
                         cardiacArray.push(info[key].cardiacarrest);
-                        totalCardiac+=parseInt(info[key].cardiacarrest);
+                        totalCardiac += parseInt(info[key].cardiacarrest);
                         cancerArray.push(info[key].cancer);
-                        totalCancer+=parseInt(info[key].cancer);
+                        totalCancer += parseInt(info[key].cancer);
                         diabetesArray.push(info[key].diabetes);
-                        totalDiabetes+=parseInt(info[key].diabetes);
+                        totalDiabetes += parseInt(info[key].diabetes);
                         hypertensionArray.push(info[key].hypertension);
-                        totalHypertension+=parseInt(info[key].hypertension);
-                        var average = ((parseInt(info[key].cancer)+parseInt(info[key].cardiacarrest)+parseInt(info[key].diabetes)+parseInt(info[key].hypertension))/4);
+                        totalHypertension += parseInt(info[key].hypertension);
+                        var average = ((parseInt(info[key].cancer) + parseInt(info[key].cardiacarrest) + parseInt(info[key].diabetes) + parseInt(info[key].hypertension)) / 4);
                         averageArray.push(average);
                     }
                     $('#chartcontainer').highcharts({
@@ -680,7 +695,7 @@
 //                            type: 'bar'
 //                        },
                         title: {
-                            text: 'Prevalence of different diseases from '+$("#diff_dis_min_year").val()+" to "+$("#diff_dis_max_year").val()
+                            text: 'Prevalence of different diseases from ' + $("#diff_dis_min_year").val() + " to " + $("#diff_dis_max_year").val()
                         },
                         xAxis: {
                             categories: yearsArray,
@@ -730,11 +745,11 @@
                             type: 'column',
                             name: 'Chronic obstructive pulmonary disease',
                             data: cancerArray
-                        },{
+                        }, {
                             type: 'column',
                             name: 'Diabetes',
                             data: diabetesArray
-                        },{
+                        }, {
                             type: 'column',
                             name: 'Hypertension',
                             data: hypertensionArray
@@ -744,35 +759,35 @@
                             data: averageArray
                         }
                             , {
-                            type: 'pie',
-                            name: 'Total occurrences from '+$("#diff_dis_min_year").val()+" to "+$("#diff_dis_max_year").val(),
-                            data: [{
-                                name: 'Cardiovascular Disease',
-                                y: totalCardiac,
-                                color: Highcharts.getOptions().colors[0] // Jane's color
-                            }, {
-                                name: 'Hypertension',
-                                y: totalHypertension,
-                                color: Highcharts.getOptions().colors[3] // John's color
-                            },{
-                                name: 'Diabetes',
-                                y: totalDiabetes,
-                                color: Highcharts.getOptions().colors[2] // Jane's color
-                            },{
-                                name: 'Chronic obstructive pulmonary disease',
-                                y: totalCancer,
-                                color: Highcharts.getOptions().colors[1] // Jane's color
-                            }],
-                            center: [125, 115],
-                            size: 150,
-                            showInLegend: false,
-                            allowPointSelect: true,
-                            cursor: 'pointer',
-                            dataLabels: {
-                                enabled: true,
-                                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                                type: 'pie',
+                                name: 'Total occurrences from ' + $("#diff_dis_min_year").val() + " to " + $("#diff_dis_max_year").val(),
+                                data: [{
+                                    name: 'Cardiovascular Disease',
+                                    y: totalCardiac,
+                                    color: Highcharts.getOptions().colors[0] // Jane's color
+                                }, {
+                                    name: 'Hypertension',
+                                    y: totalHypertension,
+                                    color: Highcharts.getOptions().colors[3] // John's color
+                                }, {
+                                    name: 'Diabetes',
+                                    y: totalDiabetes,
+                                    color: Highcharts.getOptions().colors[2] // Jane's color
+                                }, {
+                                    name: 'Chronic obstructive pulmonary disease',
+                                    y: totalCancer,
+                                    color: Highcharts.getOptions().colors[1] // Jane's color
+                                }],
+                                center: [125, 115],
+                                size: 150,
+                                showInLegend: false,
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                                }
                             }
-                        }
                         ]
                     });
                 },
@@ -882,21 +897,21 @@
 
                         series: [{
                             data: [
-                                { x: 95, y: 95, z: 13.8, name: 'BE', country: 'Belgium' },
-                                { x: 86.5, y: 102.9, z: 14.7, name: 'DE', country: 'Germany' },
-                                { x: 80.8, y: 91.5, z: 15.8, name: 'FI', country: 'Finland' },
-                                { x: 80.4, y: 102.5, z: 12, name: 'NL', country: 'Netherlands' },
-                                { x: 80.3, y: 86.1, z: 11.8, name: 'SE', country: 'Sweden' },
-                                { x: 78.4, y: 70.1, z: 16.6, name: 'ES', country: 'Spain' },
-                                { x: 74.2, y: 68.5, z: 14.5, name: 'FR', country: 'France' },
-                                { x: 73.5, y: 83.1, z: 10, name: 'NO', country: 'Norway' },
-                                { x: 71, y: 93.2, z: 24.7, name: 'UK', country: 'United Kingdom' },
-                                { x: 69.2, y: 57.6, z: 10.4, name: 'IT', country: 'Italy' },
-                                { x: 68.6, y: 20, z: 16, name: 'RU', country: 'Russia' },
-                                { x: 65.5, y: 126.4, z: 35.3, name: 'US', country: 'United States' },
-                                { x: 65.4, y: 50.8, z: 28.5, name: 'HU', country: 'Hungary' },
-                                { x: 63.4, y: 51.8, z: 15.4, name: 'PT', country: 'Portugal' },
-                                { x: 64, y: 82.9, z: 31.3, name: 'NZ', country: 'New Zealand' }
+                                {x: 95, y: 95, z: 13.8, name: 'BE', country: 'Belgium'},
+                                {x: 86.5, y: 102.9, z: 14.7, name: 'DE', country: 'Germany'},
+                                {x: 80.8, y: 91.5, z: 15.8, name: 'FI', country: 'Finland'},
+                                {x: 80.4, y: 102.5, z: 12, name: 'NL', country: 'Netherlands'},
+                                {x: 80.3, y: 86.1, z: 11.8, name: 'SE', country: 'Sweden'},
+                                {x: 78.4, y: 70.1, z: 16.6, name: 'ES', country: 'Spain'},
+                                {x: 74.2, y: 68.5, z: 14.5, name: 'FR', country: 'France'},
+                                {x: 73.5, y: 83.1, z: 10, name: 'NO', country: 'Norway'},
+                                {x: 71, y: 93.2, z: 24.7, name: 'UK', country: 'United Kingdom'},
+                                {x: 69.2, y: 57.6, z: 10.4, name: 'IT', country: 'Italy'},
+                                {x: 68.6, y: 20, z: 16, name: 'RU', country: 'Russia'},
+                                {x: 65.5, y: 126.4, z: 35.3, name: 'US', country: 'United States'},
+                                {x: 65.4, y: 50.8, z: 28.5, name: 'HU', country: 'Hungary'},
+                                {x: 63.4, y: 51.8, z: 15.4, name: 'PT', country: 'Portugal'},
+                                {x: 64, y: 82.9, z: 31.3, name: 'NZ', country: 'New Zealand'}
                             ]
                         }]
 
@@ -1112,14 +1127,19 @@
                 <div id="logout-div">
 
                     <%--<a href="<c:url value="j_spring_security_logout" />" ><i title="Logout" class="fa fa-sign-out fa-2x"></i></a>--%>
-                    <a id="loading-spinner" style="display:none;position: absolute;left: 360px;" onclick="void(0);" href="javascript:void(0);"><i class="fa fa-spinner fa-spin fa-2x" aria-hidden="true"></i> loading results...</a>
+                    <a id="loading-spinner" style="display:none;position: absolute;left: 360px;" onclick="void(0);"
+                       href="javascript:void(0);"><i class="fa fa-spinner fa-spin fa-2x" aria-hidden="true"></i> loading
+                        results...</a>
+                    <a href="/settings" onmouseover="handleSpin(this);" onmouseout="handleSpin(this);" style="margin-right: 20px;"><i title="Settings"
+                                           class="fa fa-cog fa-2x"></i></a>
                     <a onclick="logout();" href="javascript:void(0);"><i title="Logout"
                                                                          class="fa fa-sign-out fa-2x"></i></a>
+
                 </div>
                 <ul>
-                    <li><a href="#tabs-1">Map Search</a></li>
-                    <li><a onclick="initCompare()" href="#tabs-2">Comparison</a></li>
-                    <li><a href="#tabs-3">Charts</a></li>
+                    <li><a onclick="initCompareCounter();" href="#tabs-1">Map Search</a></li>
+                    <li><a onclick="initCompare();" href="#tabs-2">Comparison</a></li>
+                    <li><a onclick="initCompareCounter();" href="#tabs-3">Charts</a></li>
                     <%--<sec:authorize access="hasRole('ROLE_USER')"><li><a href="#tabs-2">Line Chart</a></li></sec:authorize>--%>
                     <%--<sec:authorize access="hasRole('ROLE_USER')"><li><a href="#tabs-3">Pie Chart</a></li></sec:authorize>--%>
                     <%--<sec:authorize access="hasRole('ROLE_USER')"><li><a href="#tabs-4">Histogram Chart</a></li></sec:authorize>--%>
@@ -1127,7 +1147,7 @@
                 <div id="tabs-1" style="height:100%">
                     <div class="col-xs-12">
                         <div class="col-xs-12" style="z-index:3;" id="top-functions">
-                            <div class="col-xs-1" style="margin-left: -15px; margin-right: 25px;">
+                            <div class="col-xs-1" style="margin-left: -10px; margin-right: 25px;">
                                 <input style="margin-top:10px;" type="button" id="hide-filters-btn"
                                        class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
@@ -1142,8 +1162,9 @@
                                 </div>
                             </div>
                             <div class="">
-                                <div style="position: absolute; left: 260px; margin-top:10px;">
-                                    <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save Queries</label>
+                                <div style="position: absolute; left: 275px; margin-top:10px;">
+                                    <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save
+                                    Queries</label>
                                 </div>
                             </div>
                             <div class="" id="timeline-wrapper">
@@ -1154,39 +1175,7 @@
 
                                         <div id="timeline">
                                             <ul id="dates">
-                                                <li><a id="a-1998" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">1998</a>
-                                                </li>
-                                                <li><a id="a-1999" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">1999</a>
-                                                </li>
-                                                <li><a id="a-2000" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2000</a>
-                                                </li>
-                                                <li><a id="a-2001" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2001</a>
-                                                </li>
-                                                <li><a id="a-2002" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2002</a>
-                                                </li>
-                                                <li><a id="a-2003" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2003</a>
-                                                </li>
-                                                <li><a id="a-2004" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2004</a>
-                                                </li>
-                                                <li><a id="a-2005" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2005</a>
-                                                </li>
-                                                <li><a id="a-2006" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2006</a>
-                                                </li>
-                                                <li><a id="a-2007" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2007</a>
-                                                </li>
-                                                <li><a id="a-2008" onclick="handleRange(this);"
-                                                       href="javascript:void(0);">2008</a>
-                                                </li>
+
                                             </ul>
                                             <ul id="issues">
                                             </ul>
@@ -1198,150 +1187,7 @@
                         <div class="col-xs-12 top-margin">
                             <div class="col-xs-3" id="filters">
                                 <div class="col-xs-12 text-center">
-                                    <div id="main-accordion">
-                                        <div>
-                                            <h3>Disease Type</h3>
-                                            <p></p>
-                                        </div>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul class="inner-ul-menu" style="display: block !important;">
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="diabetes"><img src="../images/unchecked.png"/> Diabetes</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="cancer"><img src="../images/unchecked.png"/> Obstructive pulmonary disease</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="hypertension"><img src="../images/unchecked.png"/> Hypertension</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="mentalillness"><img src="../images/unchecked.png"/> Mental illness</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="anxiety"><img src="../images/unchecked.png"/> Mood and anxiety disorders</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="asthma"><img src="../images/unchecked.png"/> Asthma</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="ischemic-heartdisease"><img src="../images/unchecked.png"/> Ischemic Heart Disease</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="myocardial"><img src="../images/unchecked.png"/> Acute Myocardial Infarction</a></li>
-                                                <li><a class="disease-selector functional" style="text-decoration: none;"
-                                                       href="javascript:void(0);" onclick="handleActivation(this);"
-                                                       disease="heart-failure"><img src="../images/unchecked.png"/> Heart Failure</a></li>
-                                            </ul>
-                                        </div>
-                                        <h3>Year</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <br/>
-                                                <li class="input-class"><input type="text" placeholder="From Year..."
-                                                                               id="minYear"
-                                                                               class="form-control input-sm"/><br/></li>
-                                                <li class="input-class"><input type="text" placeholder="To Year..."
-                                                                               id="maxYear"
-                                                                               class="form-control input-sm"/><br/></li>
-                                            </ul>
-                                        </div>
-                                        <h3>Age</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <br/>
-                                                <li class="input-class"><input type="text" placeholder="From Age..."
-                                                                               id="minAge"
-                                                                               class="form-control input-sm"/><br/></li>
-                                                <li class="input-class"><input type="text" placeholder="To Age..."
-                                                                               id="maxAge"
-                                                                               class="form-control input-sm"/><br/></li>
-                                            </ul>
-                                        </div>
-                                        <h3>Sex</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <li class="input-class">
-                                                    <br/>
-                                                    <select id="sex" class="form-control input-sm">
-                                                        <option value="*">All</option>
-                                                        <option value="F">Female</option>
-                                                        <option value="M">Male</option>
-                                                    </select>
-                                                    <br/>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <h3>Healthcare Utilization</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <li class="input-class">
-                                                    <br/>
-                                                    <select id="healthcare" class="form-control input-sm">
-                                                        <option value="*">Not important</option>
-                                                        <option value="1">Yes</option>
-                                                        <option value="0">No</option>
-                                                    </select>
-                                                    <br/>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <h3>Mortality</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <li class="input-class">
-                                                    <br/>
-                                                    <select id="mortality" class="form-control input-sm">
-                                                        <option value="*">Not important</option>
-                                                        <option value="1">Yes</option>
-                                                        <option value="0">No</option>
-                                                    </select>
-                                                    <br/>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <h3>Comorbidities</h3>
-                                        <div style="padding: 0!important;" class="cd-accordion-menu">
-                                            <ul style="display: block !important;" class="inner-ul-menu">
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
-                                                       href="javascript:void(0);" comorbidity="bloodpressure"
-                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Ischemic Heart Disease</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
-                                                       href="javascript:void(0);" comorbidity="nausia"
-                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Heart Failure</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
-                                                       href="javascript:void(0);" comorbidity="dizziness"
-                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Acute Myocardial Infarction</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector functional"
-                                                       href="javascript:void(0);" comorbidity="seizure"
-                                                       onclick="handleActivation(this);"><img src="../images/unchecked.png"/> Hypertension</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">CVD</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">End stage renal disease</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Renal Failure</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Amputation</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Obstructive pulmonary disease</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Asthma</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Mental illness</a></li>
-                                                <li><a style="text-decoration: none;" class="comorbidity-selector non-functional"
-                                                       disabled href="javascript:void(0);" comorbidity=""
-                                                       onclick="void(0);">Mood and anxiety disorder</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <jsp:include page="accordion-menu.jsp"/>
                                 </div>
                                 <div class="col-xs-12 text-center" style="margin-top:10px;">
                                     <div class="btn-group">
@@ -1369,8 +1215,11 @@
                                 <div id="statistics-container" style="margin-top: 20px; display:none;">
                                     <div class="panel panel-default">
                                         <div class="panel-heading">
-                                            <div style="display: inline-block;"><img src="../images/statistics.png" width="48px"/></div>
-                                            <div style="display: inline-block; vertical-align: top;margin-top: 15px;">Result's statistics</div>
+                                            <div style="display: inline-block;"><img src="../images/statistics.png"
+                                                                                     width="48px"/></div>
+                                            <div style="display: inline-block; vertical-align: top;margin-top: 15px;">
+                                                Result's statistics
+                                            </div>
                                         </div>
                                         <div id="age-statistics-container" class="panel-body"></div>
                                     </div>
@@ -1438,28 +1287,38 @@
                         <div class="right" style="border-left: 1px solid #EFEFEF;">
                             <div id="accordion">
                                 <h3>Prevalence of disease per sex for different age groups</h3>
+
                                 <div>
                                     <label style="margin-top: 10px;"> Disease Type:</label>
                                     <select id="disease-chart" style="margin-top:5px;" class="form-control input-sm">
-                                        <option value="*">All</option>
                                         <option value="diabetes">Diabetes</option>
-                                        <option value="cardiacarrest">Cardiovascular Disease</option>
-                                        <option value="cancer">Chronic obstructive pulmonary disease</option>
+                                        <option value="cancer">Obstructive Pulmonary Disease</option>
                                         <option value="hypertension">Hypertension</option>
+                                        <option value="mentalillness">Mental Illness</option>
+                                        <option value="anxiety">Mood and Anxieety Disorders</option>
+                                        <option value="asthma">Asthma</option>
+                                        <option value="ischemic-heartdisease">Ischemic Heart Disease</option>
+                                        <option value="myocardial">Acute Myocardial Infarction</option>
+                                        <option value="heart-failure">Heart Failure</option>
                                     </select>
-                                    <input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw" onclick="sendChartRequest();"/>
+                                    <input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw"
+                                           onclick="sendChartRequest();"/>
                                 </div>
-                                <h3>Prevalence of diseases in different years</h3>
+                                <!--<h3>Prevalence of diseases in different years</h3>
+
                                 <div>
-                                    <input style="margin-top:10px;" type="text" class="form-control" id="diff_dis_min_year" placeholder="Starting year..."/>
-                                    <input style="margin-top:5px;" type="text" class="form-control" id="diff_dis_max_year" placeholder="Finishing year..."/>
-                                    <input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw" onclick="sendDifferentDiseasesRequest();"/>
-                                </div>
+                                    <input style="margin-top:10px;" type="text" class="form-control"
+                                           id="diff_dis_min_year" placeholder="Starting year..."/>
+                                    <input style="margin-top:5px;" type="text" class="form-control"
+                                           id="diff_dis_max_year" placeholder="Finishing year..."/>
+                                    <input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw"
+                                           onclick="sendDifferentDiseasesRequest();"/>
+                                </div>-->
                             </div>
-                            <%--<div>--%>
+                                <%--<div>--%>
                                 <%--<label style="width: 100%; text-align: center;">Prevalence of diseases in different areas</label>--%>
                                 <%--<input type="button" style="margin-top: 10px;" class="btn btn-primary" value="Draw" onclick="sendBubbleChartRequest();"/>--%>
-                            <%--</div>--%>
+                                <%--</div>--%>
                         </div>
                     </div>
                     <%--<div id="tabs-4" style="display: inline-block;margin-top: 10px;width: 100%;">--%>
@@ -1497,6 +1356,7 @@
         }
     });
     var inervalHolder;
+    var compareRun = 0;
     var isPaused = true;
     if (($(window).height() + 100) < $(document).height()) {
         $('#top-link-block').removeClass('hidden').affix({
@@ -1505,6 +1365,32 @@
         });
     }
     jQuery(document).ready(function () {
+        $("#accordian a").click(function () {
+            var link = $(this);
+            var closest_ul = link.closest("ul");
+            var parallel_active_links = closest_ul.find(".active")
+            var closest_li = link.closest("li");
+            var link_status = closest_li.hasClass("active");
+            var count = 0;
+
+            closest_ul.find("ul").slideUp(function () {
+                if (++count == closest_ul.find("ul").length)
+                    parallel_active_links.removeClass("active");
+            });
+
+            if (!link_status) {
+                closest_li.children("ul").slideDown();
+                closest_li.addClass("active");
+            }
+        });
+
+        var lis = "";
+        for (var i = 1995; i <= 2015; i++) {
+            lis += '<li><a id="a-' + i + '" onclick="handleRange(this);"'
+                    + 'href="javascript:void(0);">' + i + '</a>'
+                    + '</li>';
+        }
+        $("#timeline #dates").html(lis);
         jQuery("#tabs").tabs();
         jQuery("#accordion").accordion({heightStyle: 'content'});
         jQuery("#main-accordion").accordion({
@@ -1540,12 +1426,12 @@
 
     }
     function handleActivation(elem) {
-        if ($(elem).hasClass("active")) {
-            $(elem).removeClass("active");
-            $(elem).find("img").attr("src","../images/unchecked.png");
+        if ($(elem).hasClass("active-filter")) {
+            $(elem).removeClass("active-filter");
+            $(elem).find("img").attr("src", "../images/unchecked.png");
         } else {
-            $(elem).find("img").attr("src","../images/checked.png");
-            $(elem).addClass("active");
+            $(elem).find("img").attr("src", "../images/checked.png");
+            $(elem).addClass("active-filter");
 
         }
     }
@@ -1822,14 +1708,15 @@
         }
         clearLegend();
         var disease = "";
-        $(".disease-selector.active").each(function () {
+        $(".disease-selector.active-filter").each(function () {
+            console.log($(this).attr("disease"));
             disease += $(this).attr("disease") + ",";
         });
         disease = disease.substr(0, disease.length - 1);
         var comorbidity = "";
-        $(".comorbidity-selector.active").each(function () {
+        $(".comorbidity-selector.active-filter").each(function () {
             comorbidity += $(this).attr("comorbidity") + ",";
-        })
+        });
         comorbidity = comorbidity.substr(0, comorbidity.length - 1);
         if (timelineDate === undefined) {
 //            $("#tabs").mask("<img height='20px' src='../images/loading.gif'/> Processing...");
@@ -1840,9 +1727,9 @@
         var healthcare = document.getElementById('healthcare').value;
         var mortality = document.getElementById('mortality').value;
         $.ajax({
-            url: "/sendRequest?comorbidity=" + comorbidity + "&disease=" + disease + "&minYear=" + minYear + "&maxYear=" + maxYear +
+            url: "/sendMyRequest?comorbidity=" + comorbidity + "&disease=" + disease + "&minYear=" + minYear + "&maxYear=" + maxYear +
             "&healthcare=" + healthcare + "&mortality=" + mortality + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
-            type: 'GET',
+            type: 'POST',
             dataType: 'json',
             contentType: 'application/json',
             mimeType: 'application/json',
@@ -1863,11 +1750,14 @@
 //                rainbow.setSpectrum('red', 'FFFFFF', '#00ff00');
                 var resultGradient = jsgradient.generateGradient('#FFFFFF', '#FF0400', cnt);
                 cnt = 0;
+                var borderColor = "black";
                 for (var i = 0; i < res.length; i++) {
-                    console.log(res[i].color);
+                    if(i == 0) {
+                        borderColor = res[i].color;
+                    }
                     if ($("#" + res[i].color).length <= 0) {
-                        if(res[i].color!=undefined) {
-                            $("#legend-content").append("<div id='" + res[i].color + "'><div class='col-xs-1' style='margin-bottom:5px; height:25px;background-color: " + res[i].color + "'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-10'>" + res[i].description + "</div></div>");
+                        if (res[i].color != undefined) {
+                            $("#legend-content").append("<div id='" + res[i].color + "'><div class='col-xs-1' style='margin-bottom:5px; height:25px;border:1px solid #"+borderColor+"; background-color: " + res[i].color + "'></div><div  style='margin-top:8px;margin-bottom:5px; height:25px;' class='col-xs-9'>" + res[i].description + "</div></div>");
                         }
                     }
                     prepareForShowFeature(res[i].value, "#" + res[i].color, res[i].count);
@@ -1879,16 +1769,16 @@
                 }
                 showLegend();
                 $("#timeline a").removeClass("selected");
-                if (minYear == "" || parseInt(minYear) < 1998)minYear = 1998;
-                if (maxYear == "" || parseInt(maxYear) > 2008)maxYear = 2008;
+                if (minYear == "" || parseInt(minYear) < 1995)minYear = 1995;
+                if (maxYear == "" || parseInt(maxYear) > 2015)maxYear = 2015;
                 $("#a-" + minYear).addClass("selected");
                 $("#a-" + maxYear).addClass("selected");
                 var statsHtml = "<div class='stats-category'>Statistics related to <b style='font-weight: bolder;'>age</b>:</div>"
-                        +"<div class='stats-wrapper'><div class='stats-title'>Total count:</div><div class='stats-value'>"+ageCount+"</div></div>"
-                        +"<div class='stats-wrapper'><div class='stats-title'>Minimum value:</div><div class='stats-value'>"+ageMin+"</div></div>"
-                        +"<div class='stats-wrapper'><div class='stats-title'>Maximum value:</div><div class='stats-value'>"+ageMax+"</div></div>"
-                        +"<div class='stats-wrapper'><div class='stats-title'>Average:</div><div class='stats-value'>"+parseFloat(ageAverage).toFixed(4)+"</div></div>"
-                        +"<div class='stats-wrapper'><div class='stats-title'>Standard Deviation:</div><div class='stats-value'>"+parseFloat(ageStddev).toFixed(4)+"</div></div>"
+                        + "<div class='stats-wrapper'><div class='stats-title'>Total count:</div><div class='stats-value'>" + ageCount + "</div></div>"
+                        + "<div class='stats-wrapper'><div class='stats-title'>Minimum value:</div><div class='stats-value'>" + ageMin + "</div></div>"
+                        + "<div class='stats-wrapper'><div class='stats-title'>Maximum value:</div><div class='stats-value'>" + ageMax + "</div></div>"
+                        + "<div class='stats-wrapper'><div class='stats-title'>Average:</div><div class='stats-value'>" + parseFloat(ageAverage).toFixed(4) + "</div></div>"
+                        + "<div class='stats-wrapper'><div class='stats-title'>Standard Deviation:</div><div class='stats-value'>" + parseFloat(ageStddev).toFixed(4) + "</div></div>"
                 $("#age-statistics-container").html(statsHtml);
                 $("#statistics-container").show();
                 $("#loading-spinner").hide();
@@ -1949,7 +1839,6 @@
         $("#table-container").html(tableStr);
     }
     function scrollToId(theId) {
-        console.log(theId);
         var container = $("body");
         var scrollTo = $("#" + theId);
         $("#table-container tr").removeClass("scrolled");
@@ -1961,6 +1850,13 @@
         elem.fadeOut("slow", function () {
             elem.fadeIn("slow");
         });
+    }
+    function handleSpin(obj){
+        if($(obj).find("i").hasClass("fa-spin")){
+            $(obj).find("i").removeClass("fa-spin")
+        }else{
+            $(obj).find("i").addClass("fa-spin")
+        }
     }
 
 </script>

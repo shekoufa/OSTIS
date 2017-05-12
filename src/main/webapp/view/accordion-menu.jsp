@@ -451,23 +451,36 @@
                             <a href="#">Hospitalization</a>
                             <ul>
                                 <li>
+                                    <a href="#">Were hospitalized</a>
+                                    <ul>
+                                        <li class="input-class">
+                                            <br/>
+                                            <select id="hospitalizationStatus" name="hospitalizationStatus" class="form-control input-sm">
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                                <option selected value="*">Not Important</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li id="no-of-hospitalization" style="display: none;">
                                     <a href="#">Number of Hospitalization</a>
                                     <ul>
-                                        <li class="input-class"><br/><input type="text" placeholder="From number..."
+                                        <li class="input-class"><br/><input type="text" id="noOfHospFrom" placeholder="From number..."
 
                                                                             class="form-control input-sm"/><br/></li>
-                                        <li class="input-class"><input type="text" placeholder="To number..."
+                                        <li class="input-class"><input type="text" id="noOfHospTo" placeholder="To number..."
 
                                                                        class="form-control input-sm"/><br/></li>
                                     </ul>
                                 </li>
-                                <li>
+                                <li id="length-of-stay" style="display: none;">
                                     <a href="#">Length of Stay</a>
                                     <ul>
-                                        <li class="input-class"><br/><input type="text" placeholder="From duration..."
+                                        <li class="input-class"><br/><input type="text" id="lengthOfStayFrom" placeholder="From duration..."
 
                                                                             class="form-control input-sm"/><br/></li>
-                                        <li class="input-class"><input type="text" placeholder="To duration..."
+                                        <li class="input-class"><input type="text" id="lengthOfStayTo" placeholder="To duration..."
 
                                                                        class="form-control input-sm"/><br/></li>
                                     </ul>
@@ -567,14 +580,29 @@
             <ul>
                 <br/>
                 <select id="geography-level" class="form-control input-sm">
-                    <option value="fsa">Forward Sortation Area</option>
-                    <option value="cs">Census Subdivision</option>
-                    <option value="da">Dissemination Area</option>
-                    <option value="hr">Health Region</option>
-                    <option value="la">Local Area</option>
+                    <option selected value="fsa">Forward Sortation Area</option>
+                    <option disabled value="fsa">Census Subdivision</option>
+                    <option disabled value="fsa">Dissemination Area</option>
+                    <option disabled value="fsa">Health Region</option>
+                    <option disabled value="fsa">Local Area</option>
+                    <!--<option selected value="CSD_UID">Census Subdivision</option>
+                    <option value="DA_UID_11">Dissemination Area</option>
+                    <option value="HA_ID">Health Region</option>
+                    <option value="LA_ID">Local Area</option>-->
                 </select>
                 <br/>
             </ul>
         </li>
     </ul>
 </div>
+<script type="text/javascript">
+    $('#hospitalizationStatus').on('change', function() {
+        if( this.value == "yes"){
+            $("#no-of-hospitalization").show();
+            $("#length-of-stay").show();
+        }else{
+            $("#no-of-hospitalization").hide();
+            $("#length-of-stay").hide();
+        }
+    });
+</script>

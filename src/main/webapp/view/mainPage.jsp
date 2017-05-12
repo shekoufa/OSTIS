@@ -53,7 +53,10 @@
     <script type="text/javascript" src="../js/exporting.js"></script>
 
     <script type="text/javascript" src="../js/jsGradient.js"></script>
-    <script type="text/javascript" src="../js/zipregions.js"></script>
+    <script type="text/javascript" src="../js/regions/NL_Forward_Sortation_Area.js"></script>
+    <script type="text/javascript" src="../js/regions/NL_Dissemination_Areas.js"></script>
+    <script type="text/javascript" src="../js/regions/NL_Local_Areas.js"></script>
+    <script type="text/javascript" src="../js/regions/NL_Census_Subdivision.js"></script>
     <script type="text/javascript" src="../js/jquery.loadmask.js"></script>
     <script type="text/javascript" src="../js/jquery.mobile.custom.min.js"></script>
     <script type="text/javascript" src="../js/modernizr.js"></script> <!-- Resource jQuery -->
@@ -61,6 +64,7 @@
     <script type="text/javascript" src="../js/jquery.timelinr-0.9.6.js"></script> <!-- Resource jQuery -->
     <script type="text/javascript" src="../js/menu-main.js"></script> <!-- Resource jQuery -->
     <script type="text/javascript" src="../js/sweetalert.min.js"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="../js/timeline-play.js"></script> <!-- Resource jQuery -->
 
     <%--<script type="text/javascript" src="../js/jquery.easing.1.3.js"></script> <!-- Resource jQuery -->--%>
     <%--<script type="text/javascript" src="../js/jquery.easing.compatibility.js"></script> <!-- Resource jQuery -->--%>
@@ -68,7 +72,9 @@
         var total = 0;
         var total1 = 0;
         var total2 = 0;
+        var timelineStartYear = 1995;
         var features = [];
+        var neededFeatures = [];
         var features1 = [];
         var features2 = [];
 
@@ -84,7 +90,7 @@
 
         var roadStyle = {
             strokeColor: "#FFFF00",
-            strokeWeight: 7,
+            strokeWeight: 2,
             strokeOpacity: 0.75
         };
 
@@ -106,8 +112,9 @@
 
         function init() {
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 7,
-                center: new google.maps.LatLng(49.0363, -56),
+                zoom: 6,
+                scrollwheel: false,
+                center: new google.maps.LatLng(51.8567976, -59.5151579),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 keyboardShortcuts: false,
 //                disableDefaultUI: true,
@@ -120,8 +127,23 @@
                 autoPlay: 'true',
                 autoPlayDirection: 'forward'
             });
-
-
+            // add the double-click event listener
+            google.maps.event.addListener(marker, 'dblclick', function(event){
+                smoothZoom(map, 12, map.getZoom()); // call smoothZoom, parameters map, final zoomLevel, and starting zoom level
+            });
+        }
+        // the smooth zoom function
+        function smoothZoom (map, max, cnt) {
+            if (cnt >= max) {
+                return;
+            }
+            else {
+                z = google.maps.event.addListener(map, 'zoom_changed', function(event){
+                    google.maps.event.removeListener(z);
+                    smoothZoom(map, max, cnt + 1);
+                });
+                setTimeout(function(){map.setZoom(cnt)}, 80); // 80ms is what I found to work well on my system -- it might not work well on all systems
+            }
         }
         function initCompareCounter() {
             compareRun = 0;
@@ -130,7 +152,6 @@
             var latLang = [];
             var correct = [48.5663, -55.8457];
             var adjusted = [50.0663, -59.9457];
-            console.log("Now compareRun is: " + compareRun);
             if (compareRun <= 1) {
                 latLang = adjusted;
             } else {
@@ -254,10 +275,10 @@
             }
         }
         function showFeature(geojson, color, postCode, count, style) {
-            ff = {"fillColor": color, "weight": 5, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWidth": 1}
+            ff = {"fillColor": color, "weight": 5, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWeight": 2}
             currentFeature_or_Features = new GeoJSON(geojson, ff || null);
             features.push(currentFeature_or_Features);
-            currentFeature_or_Features.strokeWidth = 10;
+            currentFeature_or_Features.strokeWeight= 2;
             if (currentFeature_or_Features.type && currentFeature_or_Features.type == "Error") {
                 document.getElementById("put_geojson_string_here").value = currentFeature_or_Features.message;
                 return;
@@ -269,6 +290,7 @@
                             currentFeature_or_Features[i][j].setMap(map);
                             if (currentFeature_or_Features[i][j].geojsonProperties) {
                                 setInfoWindow(currentFeature_or_Features[i][j]);
+                                neededFeatures.push(currentFeature_or_Features[i][j]);
                             }
                         }
                     }
@@ -278,20 +300,22 @@
                     }
                     if (currentFeature_or_Features[i].geojsonProperties) {
                         setInfoWindow(currentFeature_or_Features[i]);
+                        neededFeatures.push(currentFeature_or_Features[i]);
                     }
                 }
             } else {
                 currentFeature_or_Features.setMap(map)
                 if (currentFeature_or_Features.geojsonProperties) {
                     setInfoWindow(currentFeature_or_Features);
+                    neededFeatures.push(currentFeature_or_Features);
                 }
             }
         }
         function showFeature1(geojson, color, postCode, count, style) {
-            ff = {"fillColor": color, "weight": 1, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWidth": 1}
+            ff = {"fillColor": color, "weight": 1, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWeight": 2}
             currentFeature_or_Features1 = new GeoJSON(geojson, ff || null);
             features1.push(currentFeature_or_Features1);
-            currentFeature_or_Features1.strokeWidth = 1;
+            currentFeature_or_Features1.strokeWeight= 2;
             if (currentFeature_or_Features1.type && currentFeature_or_Features1.type == "Error") {
                 document.getElementById("put_geojson_string_here").value = currentFeature_or_Features1.message;
                 return;
@@ -322,10 +346,10 @@
             }
         }
         function showFeature2(geojson, color, postCode, count, style) {
-            ff = {"fillColor": color, "weight": 1, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWidth": 1}
+            ff = {"fillColor": color, "weight": 1, "fillOpacity": 0.8, "strokeColor": 'black', "strokeWeight": 2}
             currentFeature_or_Features2 = new GeoJSON(geojson, ff || null);
             features2.push(currentFeature_or_Features2);
-            currentFeature_or_Features2.strokeWidth = 1;
+            currentFeature_or_Features2.strokeWeight = 2;
             if (currentFeature_or_Features2.type && currentFeature_or_Features2.type == "Error") {
                 document.getElementById("put_geojson_string_here").value = currentFeature_or_Features2.message;
                 return;
@@ -383,7 +407,7 @@
             }
         }
         function setInfoWindow(feature) {
-            google.maps.event.addListener(feature, "click", function (event) {
+            google.maps.event.addListener(feature, "mouseover", function (event) {
                 var content = "<div id=''><strong>Results in this area:</strong><br />";
                 var postalcode = "";
                 for (var j in this.geojsonProperties) {
@@ -391,29 +415,39 @@
                         postalcode = this.geojsonProperties[j];
                     }
                     if (j != "Description2" && j != "Description1") {
-                        if (j == "Description") {
+                        if (j == "Percentage") {
                             content += "Description" + ": " + this.geojsonProperties[j] + "<br />";
                         } else {
-                            content += j + ": " + this.geojsonProperties[j] + "<br />";
+                            if (j != "description") {
+                                content += j + ": " + this.geojsonProperties[j] + "<br />";
+                            }
                         }
                     }
                 }
                 infowindow.setContent(content);
                 infowindow.setPosition(event.latLng);
-                swal({
-                            title: "",
-                            text: content,
-                            html: true,
-                            showCancelButton: true,
-                            confirmButtonColor: "#286090",
-                            confirmButtonText: "Show in table",
-                            closeOnConfirm: true
-                        },
-                        function () {
-                            scrollToId("ROW-" + postalcode);
-                        });
-//                infowindow.open(map);
-            });
+//                swal({
+//                            title: "",
+//                            text: content,
+//                            html: true,
+//                            showCancelButton: true,
+//                            confirmButtonColor: "#286090",
+//                            confirmButtonText: "Show in table",
+//                            closeOnConfirm: true
+//                        },
+//                        function () {
+//                            scrollToId("ROW-" + postalcode);
+//                        });
+                neededFeatures.forEach(function(element) {
+                    element.setOptions({strokeColor: "black"});
+                    element.setOptions({strokeWeight: 2});
+                    element.setOptions({zIndex: 1});
+                });
+                feature.setOptions({strokeColor: "#F7D652"});
+                feature.setOptions({strokeWeight: 4});
+                feature.setOptions({zIndex: 1000});
+                infowindow.open(map);
+         });
         }
         function setInfoWindow1(feature) {
             google.maps.event.addListener(feature, "click", function (event) {
@@ -457,29 +491,134 @@
                 infowindow2.open(map2);
             });
         }
+        var showFeatureCount = 0;
         function prepareForShowFeature(ppcode, color, count) {
-            for (var i in zipRegions.features) {
-                var targetPpCode = zipRegions.features[i].properties["Postal Code"];
-                if (targetPpCode == ppcode) {
-                    var geometry = zipRegions.features[i].geometry;
-                    var type = geometry.type;
-                    type = "geojson_" + type;
-                    var percentage = (count / total) * 100;
-                    if (type = "Polygon") {
-                        geojson_Polygon = geometry;
-                        zipRegions.features[i].properties.Description = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
-                        showFeature(zipRegions.features[i], color, ppcode, count);
-                    } else if (type = "MultiPolygon") {
-                        geojson_MultiPolygon = geometry;
-                        zipRegions.features[i].properties.Description = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
-                        showFeature(zipRegions.features[i], color, ppcode, count);
+            var log = document.getElementById("geography-level").value;
+            if (log == "fsa") {
+                for (var i in zipRegions.features) {
+                    var targetPpCode = zipRegions.features[i].properties["Name"];
+                    var description = zipRegions.features[i].properties["description"];
+                    delete zipRegions.features[i].properties.timestamp;
+                    delete zipRegions.features[i].properties.begin;
+                    delete zipRegions.features[i].properties.end;
+                    delete zipRegions.features[i].properties.tessellate;
+                    delete zipRegions.features[i].properties.extrude;
+                    delete zipRegions.features[i].properties.visibility;
+                    delete zipRegions.features[i].properties.drawOrder;
+                    delete zipRegions.features[i].properties.icon;
+                    delete zipRegions.features[i].properties.snippet;
+                    if (targetPpCode == ppcode) {
+                        var geometry = zipRegions.features[i].geometry;
+                        var type = geometry.type;
+                        type = "geojson_" + type;
+                        var percentage = (count / total) * 100;
+                        if (type = "Polygon") {
+                            geojson_Polygon = geometry;
+                            zipRegions.features[i].properties.description = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(zipRegions.features[i], color, ppcode, count);
+                        } else if (type = "MultiPolygon") {
+                            geojson_MultiPolygon = geometry;
+                            zipRegions.features[i].properties.description = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(zipRegions.features[i], color, ppcode, count);
+                        }
+                    } else {
+                    }
+                }
+            }
+            if (log == "DA_UID_11") {
+                for (var i in daRegions.features) {
+                    var targetPpCode = daRegions.features[i].properties["Name"];
+                    var description = daRegions.features[i].properties["description"];
+                    delete daRegions.features[i].properties.timestamp;
+                    delete daRegions.features[i].properties.begin;
+                    delete daRegions.features[i].properties.end;
+                    delete daRegions.features[i].properties.tessellate;
+                    delete daRegions.features[i].properties.extrude;
+                    delete daRegions.features[i].properties.visibility;
+                    delete daRegions.features[i].properties.drawOrder;
+                    delete daRegions.features[i].properties.icon;
+                    delete daRegions.features[i].properties.snippet;
+                    if (description.regexIndexOf("^(?=(.|[\n\r])*DAUID)(?=(.|[\n\r])*"+ppcode+")(.|[\n\r])*") > -1) {
+                        var geometry = daRegions.features[i].geometry;
+                        var type = geometry.type;
+                        type = "geojson_" + type;
+                        var percentage = (count / total) * 100;
+                        if (type = "Polygon") {
+                            geojson_Polygon = geometry;
+                            daRegions.features[i].properties["myKription"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(daRegions.features[i], color, ppcode, count);
+                        } else if (type = "MultiPolygon") {
+                            geojson_MultiPolygon = geometry;
+                            daRegions.features[i].properties["myKription"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(daRegions.features[i], color, ppcode, count);
+                        }
+                    }
+                }
+            }
+            if (log == "LA_ID") {
+                for (var i in laRegions.features) {
+                    var targetPpCode = laRegions.features[i].properties["Name"];
+                    var description = laRegions.features[i].properties["description"];
+                    delete laRegions.features[i].properties.timestamp;
+                    delete laRegions.features[i].properties.begin;
+                    delete laRegions.features[i].properties.end;
+                    delete laRegions.features[i].properties.tessellate;
+                    delete laRegions.features[i].properties.extrude;
+                    delete laRegions.features[i].properties.visibility;
+                    delete laRegions.features[i].properties.drawOrder;
+                    delete laRegions.features[i].properties.icon;
+                    delete laRegions.features[i].properties.snippet;
+                    if (description.regexIndexOf("^(?=(.|[\n\r])*AREA_ID)(?=(.|[\n\r])*"+ppcode+")(.|[\n\r])*") > -1) {
+                        var geometry = laRegions.features[i].geometry;
+                        var type = geometry.type;
+                        type = "geojson_" + type;
+                        var percentage = (count / total) * 100;
+                        if (type = "Polygon") {
+                            geojson_Polygon = geometry;
+                            laRegions.features[i].properties["Percentage"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(laRegions.features[i], color, ppcode, count);
+                        } else if (type = "MultiPolygon") {
+                            geojson_MultiPolygon = geometry;
+                            laRegions.features[i].properties["Percentage"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(laRegions.features[i], color, ppcode, count);
+                        }
+                    }
+                }
+            }
+            if (log == "CSD_UID"){
+                for (var i in csRegions.features) {
+                    var targetPpCode = csRegions.features[i].properties["Name"];
+                    var description = csRegions.features[i].properties["description"];
+                    delete csRegions.features[i].properties.timestamp;
+                    delete csRegions.features[i].properties.begin;
+                    delete csRegions.features[i].properties.end;
+                    delete csRegions.features[i].properties.tessellate;
+                    delete csRegions.features[i].properties.extrude;
+                    delete csRegions.features[i].properties.visibility;
+                    delete csRegions.features[i].properties.drawOrder;
+                    delete csRegions.features[i].properties.icon;
+                    delete csRegions.features[i].properties.snippet;
+                    if (description.regexIndexOf("^(?=(.|[\n\r])*CSDUID)(?=(.|[\n\r])*"+ppcode+")(.|[\n\r])*") > -1) {
+                        var geometry = csRegions.features[i].geometry;
+                        var type = geometry.type;
+                        type = "geojson_" + type;
+                        var percentage = (count / total) * 100;
+                        if (type = "Polygon") {
+                            geojson_Polygon = geometry;
+                            csRegions.features[i].properties["Percentage"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(csRegions.features[i], color, ppcode, count);
+                        } else if (type = "MultiPolygon") {
+                            geojson_MultiPolygon = geometry;
+                            csRegions.features[i].properties["Percentage"] = count + " persons out of " + total + " (" + percentage.toFixed(2) + "%)";
+                            showFeature(csRegions.features[i], color, ppcode, count);
+                        }
                     }
                 }
             }
         }
         function prepareForShowFeature1(ppcode, color, count) {
             for (var i in zipRegions.features) {
-                var targetPpCode = zipRegions.features[i].properties["Postal Code"];
+                var targetPpCode = zipRegions.features[i].properties["Name"];
                 if (targetPpCode == ppcode) {
                     var geometry = zipRegions.features[i].geometry;
                     var type = geometry.type;
@@ -517,6 +656,10 @@
                 }
             }
         }
+        String.prototype.regexIndexOf = function(regex) {
+            var match = this.match(regex);
+            return match ? this.indexOf(match[0]) : -1;
+        };
         function sendChartRequest() {
             $.ajax({
                 url: "/sendAgeGroupRequest?disease=" + $("#disease-chart").val(),
@@ -1152,7 +1295,7 @@
                                        class="btn btn-warning btn-xs" value="Hide Filters"
                                        onclick="toggleFilters();"/>
                             </div>
-                            <div class="text-center" style="margin-bottom: 45px; float:left;margin-left:-20px;">
+                            <div class="text-center search-top-history">
                                 <div class="btn-group" style="z-index:4;">
                                     <input type="button" class="btn btn-primary btn-md" id="search-button"
                                            value="Search"
@@ -1160,19 +1303,20 @@
                                     <input type="button" class="btn btn-warning btn-md" value="Clear"
                                            onclick="clearMap();clearFilter();"/>
                                 </div>
-                            </div>
-                            <div class="">
-                                <div style="position: absolute; left: 275px; margin-top:10px;">
-                                    <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save
-                                    Queries</label>
+                                <div class="">
+                                        <input type="checkbox" id="save-queries"/>&nbsp;<label style="margin-top:6px;">Save
+                                        Queries</label>
                                 </div>
                             </div>
+
                             <div class="" id="timeline-wrapper">
                                 <div class="col-xs-12"
                                      style="padding: 0; border: 1px solid #E1E1E1; border-radius: 5px; background: #E9E9E9;">
                                     <div class="col-xs-12" style="padding: 0;">
-                                        <label style="float: left;margin-left: 5px;margin-top: 15px;">Timeline:</label>
-
+                                        <div id="timeline-play-wrapper">
+                                            <a href="javascript:void(0);" onclick="togglePlay();"><i id="play-status" title="Time play" class="fa fa-play-circle fa-2x"></i></a>
+                                            <label style="margin-left: 5px;margin-top: 15px;">Timeline:</label>
+                                        </div>
                                         <div id="timeline">
                                             <ul id="dates">
 
@@ -1189,7 +1333,7 @@
                                 <div class="col-xs-12 text-center">
                                     <jsp:include page="accordion-menu.jsp"/>
                                 </div>
-                                <div class="col-xs-12 text-center" style="margin-top:10px;">
+                                <div class="col-xs-12 text-center" style="margin-top:5px;">
                                     <div class="btn-group">
                                         <input type="button" class="btn btn-primary btn-md" id="second-search-button"
                                                value="Search"
@@ -1709,7 +1853,6 @@
         clearLegend();
         var disease = "";
         $(".disease-selector.active-filter").each(function () {
-            console.log($(this).attr("disease"));
             disease += $(this).attr("disease") + ",";
         });
         disease = disease.substr(0, disease.length - 1);
@@ -1726,9 +1869,21 @@
         var sex = document.getElementById('sex').value;
         var healthcare = document.getElementById('healthcare').value;
         var mortality = document.getElementById('mortality').value;
+        var log = document.getElementById('geography-level').value;
+        var hospitalizationStatus = document.getElementById('hospitalizationStatus').value;
+        var noOfHospFrom = document.getElementById('noOfHospFrom').value;
+        if(noOfHospFrom == '') noOfHospFrom = "*";
+        var noOfHospTo = document.getElementById('noOfHospTo').value;
+        if(noOfHospTo == '')noOfHospTo = "*";
+        var lengthOfStayFrom = document.getElementById('lengthOfStayFrom').value;
+        if(lengthOfStayFrom == '') lengthOfStayFrom = "*";
+        var lengthOfStayTo = document.getElementById('lengthOfStayTo').value;
+        if(lengthOfStayTo == '') lengthOfStayTo = "*";
         $.ajax({
             url: "/sendMyRequest?comorbidity=" + comorbidity + "&disease=" + disease + "&minYear=" + minYear + "&maxYear=" + maxYear +
-            "&healthcare=" + healthcare + "&mortality=" + mortality + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex,
+            "&healthcare=" + healthcare + "&mortality=" + mortality + "&minAge=" + minAge + "&maxAge=" + maxAge + "&sex=" + sex +
+            '&log=' + log+ '&hospitalizationStatus=' + hospitalizationStatus+ '&noOfHospFrom=' + noOfHospFrom+ '&noOfHospTo=' + noOfHospTo
+            + '&lengthOfStayFrom=' + lengthOfStayFrom+ '&lengthOfStayTo=' + lengthOfStayTo,
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',
@@ -1833,7 +1988,12 @@
         var tableStr = "";
         tableStr = "<table class='table'><thead><tr class='reporttable-row'><th>Rank</th><th>Postal Code</th><th>Province</th><th>Occurance</th></tr></thead><tbody>";
         for (var i = 0; i < rows.length; i++) {
-            tableStr += "<tr class='reporttable-row' id='ROW-" + rows[i].value + "' style='background-color:" + rows[i].color + "'><td>" + (i + 1) + "</td><td>" + rows[i].value + "</td><td>Newfoundland & Labrador</td><td>" + rows[i].count + " individuals</td></tr>";
+            var noOfIndividuals = rows[i].count;
+            var individualsString = noOfIndividuals +" individuals";
+            if (noOfIndividuals <= 5){
+                individualsString = "Below 5 individuals";
+            }
+            tableStr += "<tr class='reporttable-row' id='ROW-" + rows[i].value + "' style='background-color:" + rows[i].color + "'><td>" + (i + 1) + "</td><td>" + rows[i].value + "</td><td>Newfoundland & Labrador</td><td>" + individualsString + "</td></tr>";
         }
         tableStr += "</tbody></table>";
         $("#table-container").html(tableStr);

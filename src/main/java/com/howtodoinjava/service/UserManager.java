@@ -1,6 +1,7 @@
 package com.howtodoinjava.service;
 
 import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.PostalCodeLookup;
 import com.howtodoinjava.entity.UserEntity;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -21,4 +22,6 @@ public interface UserManager {
     History findHistoryById(Integer historyId);
     @Transactional
     void updateUser(UserEntity user);
+    @Transactional
+    List<PostalCodeLookup> selectAllPostalCodeMappings();
 }

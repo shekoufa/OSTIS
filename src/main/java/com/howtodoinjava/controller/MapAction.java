@@ -1,9 +1,6 @@
 package com.howtodoinjava.controller;
 
-import com.howtodoinjava.entity.History;
-import com.howtodoinjava.entity.Settings;
-import com.howtodoinjava.entity.SolrFieldNames;
-import com.howtodoinjava.entity.UserEntity;
+import com.howtodoinjava.entity.*;
 import com.howtodoinjava.service.UserManager;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.Preparable;
@@ -75,6 +72,20 @@ public class MapAction extends ActionSupport implements Preparable {
     private String healthcare="*";
     private String mortality="*";
     private String sex="*";
+    private String log="fsa"; //cs,da,hr,la
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
+    }
+    private String hospitalizationStatus = "*";
+    private String noOfHospFrom = "*";
+    private String noOfHospTo = "*";
+    private String lengthOfStayFrom = "*";
+    private String lengthOfStayTo = "*";
     private String comorbidity="*";
     private String disease="*";
     private Integer maximumCount = 0;
@@ -83,13 +94,24 @@ public class MapAction extends ActionSupport implements Preparable {
     private String response;
     private Integer historyId1 = 0;
     private Integer historyId2 = 0;
+    private Map<String, String> postalCodeToCCSUID;
 //    @Autowired
 //    private QuestionManager questionManager;
 
     public String showMap(){
+        if(postalCodeToCCSUID == null){
+            postalCodeToCCSUID = new HashMap<String, String>();
+        }
         logger.info("Showing main page with map and stuffs");
         UserEntity user = userManager.findUserByUsername(ServletActionContext.getRequest().getRemoteUser());
         historyList = userManager.findHistoryByUserId(user.getId());
+        List<PostalCodeLookup> postalCodeLookups = userManager.selectAllPostalCodeMappings();
+        if(postalCodeToCCSUID.size() == 0){
+            for (PostalCodeLookup postalCodeLookup : postalCodeLookups) {
+                postalCodeToCCSUID.put(postalCodeLookup.getPostalCode(), postalCodeLookup.getCcsuid());
+            }
+        }
+
 //        questionEntity = questionManager.findNextQuestion();
         return SUCCESS;
     }
@@ -716,26 +738,36 @@ public class MapAction extends ActionSupport implements Preparable {
         }
 
         diseaseComponents.append(")");
-        String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
-                "AND " + SolrFieldNames.SEX + ":" + sex;
+
+        String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString() :"")+
+                " AND " + SolrFieldNames.SEX + ":" + sex;;
+        if(hospitalizationStatus.equalsIgnoreCase("yes")){
+            theQueryString += " AND HS_Separations: ["+noOfHospFrom+" TO "+noOfHospTo+"] AND HS_DaysStay: ["+lengthOfStayFrom+" TO "+lengthOfStayTo+"] AND Year: ["+minYear+" TO "+maxYear+" ]";
+        }else if(hospitalizationStatus.equalsIgnoreCase("no")){
+            theQueryString += " AND -HS_Separations: [* TO *]";
+        }
+        /*String theQueryString = (diseaseComponents.toString().length()>0? diseaseComponents.toString()+" AND " :"")+ SolrFieldNames.AGE + ":[" + minAge + " TO " + maxAge + "] " +
+                "AND " + SolrFieldNames.SEX + ":" + sex;*/
         query.set("q", theQueryString);
         query.setFacet(true);
-        query.addFacetField("fsa");
+        query.addFacetField(log);
         query.setFacetLimit(-1);
         query.setFacetMinCount(1);
         query.setFacetSort("count");
         query.setStart(0);
-        query.set("defType", "edismax");
+//        query.set("defType", "edismax");
         query.setGetFieldStatistics(true);
-        query.setGetFieldStatistics(SolrFieldNames.AGE);
+//        query.setGetFieldStatistics(SolrFieldNames.AGE);
+        query.setGetFieldStatistics("DM_Diagnosis_MidYear_Age");
 
         QueryResponse response = solr.query(query);
-        FacetField ff = response.getFacetField(SolrFieldNames.FSA_POSTAL_CODE);
+        FacetField ff = response.getFacetField(log);
         JSONArray facetfield = new JSONArray();
         System.out.println(query.toString());
         System.out.println("After running the query: "+new Timestamp(System.currentTimeMillis()));
         //TODO: We have some results without a FSA value in the response. They will be bucketed under empty string.
-        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
+//        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get(SolrFieldNames.AGE);
+        FieldStatsInfo statsInfo = response.getFieldStatsInfo().get("DM_Diagnosis_MidYear_Age");
         List<FacetField.Count> facetEntries = ff.getValues();
         if(facetEntries.size()>=3) {
             long highestCount = facetEntries.get(0).getCount();
@@ -748,7 +780,7 @@ public class MapAction extends ActionSupport implements Preparable {
                     colorsDescription[cntDesc] = "Below "+(i);
                     break;
                 }else {
-                    colorsDescription[cntDesc] = "From "+(i-distance)+" to "+(i);
+                    colorsDescription[cntDesc] = (i-distance)+" to "+(i);
                 }
                 cntDesc++;
             }
@@ -758,7 +790,9 @@ public class MapAction extends ActionSupport implements Preparable {
                 int rank = 1;
                 for (FacetField.Count fcount : facetEntries) {
                     JSONObject attr = new JSONObject();
-                    if (fcount.getName().toLowerCase().startsWith("a")) {
+                    if (fcount.getName().toLowerCase().startsWith("a")
+                            || fcount.getName().toLowerCase().startsWith("100")
+                            || log.equalsIgnoreCase("LA_ID")) {
                         if (fcount.getCount() >= (highestCount-distance)) {
                             attr.put("value", fcount.getName().toUpperCase());
                             attr.put("count", fcount.getCount());
@@ -794,6 +828,13 @@ public class MapAction extends ActionSupport implements Preparable {
             statsObjectStr = statsObject.toString();
             facetfieldStr = facetfield.toString();
 
+        }else{
+            statsObjectStr = new String();
+            JSONObject statsObject =new JSONObject();
+            JSONObject ageStats = new JSONObject();
+            statsObject.put("ageStatistics",ageStats);
+            statsObjectStr = statsObject.toString();
+            facetfieldStr = facetfield.toString();
         }
         System.out.println("After preparing the json: "+new Timestamp(System.currentTimeMillis()));
         System.out.println();
@@ -1295,5 +1336,45 @@ public class MapAction extends ActionSupport implements Preparable {
 
     public void setSettings(Settings settings) {
         this.settings = settings;
+    }
+
+    public String getHospitalizationStatus() {
+        return hospitalizationStatus;
+    }
+
+    public void setHospitalizationStatus(String hospitalizationStatus) {
+        this.hospitalizationStatus = hospitalizationStatus;
+    }
+
+    public String getNoOfHospFrom() {
+        return noOfHospFrom;
+    }
+
+    public void setNoOfHospFrom(String noOfHospFrom) {
+        this.noOfHospFrom = noOfHospFrom;
+    }
+
+    public String getNoOfHospTo() {
+        return noOfHospTo;
+    }
+
+    public void setNoOfHospTo(String noOfHospTo) {
+        this.noOfHospTo = noOfHospTo;
+    }
+
+    public String getLengthOfStayFrom() {
+        return lengthOfStayFrom;
+    }
+
+    public void setLengthOfStayFrom(String lengthOfStayFrom) {
+        this.lengthOfStayFrom = lengthOfStayFrom;
+    }
+
+    public String getLengthOfStayTo() {
+        return lengthOfStayTo;
+    }
+
+    public void setLengthOfStayTo(String lengthOfStayTo) {
+        this.lengthOfStayTo = lengthOfStayTo;
     }
 }

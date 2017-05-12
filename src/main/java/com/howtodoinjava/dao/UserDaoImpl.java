@@ -79,4 +79,10 @@ public class UserDaoImpl implements UserDAO {
         this.sessionFactory.getCurrentSession().update(settings);
     }
 
+    @Override
+    public List<PostalCodeLookup> selectAllPostalCodeMappings() {
+        List<PostalCodeLookup> results = this.sessionFactory.getCurrentSession().createCriteria(PostalCodeLookup.class).list();
+        return results;
+    }
+
 }

@@ -2,6 +2,7 @@ package com.howtodoinjava.service;
 
 import com.howtodoinjava.dao.UserDAO;
 import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.PostalCodeLookup;
 import com.howtodoinjava.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,5 +59,10 @@ public class UserManagerImpl implements UserManager{
     @Transactional
     public void updateUser(UserEntity user) {
         userDAO.update(user);
+    }
+    @Override
+    @Transactional
+    public List<PostalCodeLookup> selectAllPostalCodeMappings(){
+        return userDAO.selectAllPostalCodeMappings();
     }
 }

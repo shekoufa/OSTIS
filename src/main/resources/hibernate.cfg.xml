@@ -9,5 +9,6 @@
         <mapping class="com.howtodoinjava.entity.UserRoleEntity" />
         <mapping class="com.howtodoinjava.entity.History" />
         <mapping class="com.howtodoinjava.entity.Settings" />
+        <mapping class="com.howtodoinjava.entity.PostalCodeLookup" />
     </session-factory>
 </hibernate-configuration>

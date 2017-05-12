@@ -1,20 +1,25 @@
-html, body{
+html, body {
     height: 100%;
 }
-a{
+
+a {
     outline: none !important;
 }
-input{
+
+input {
     outline: none !important;
 }
-.col-xs-12{
+
+.col-xs-12 {
     padding: 0;
 }
-#logout-div{
+
+#logout-div {
     float: right;
-    margin-top:6px;
+    margin-top: 6px;
     margin-right: 10px;
 }
+
 .left {
     width: 75%;
     height: 535px;
@@ -51,14 +56,17 @@ input{
     color: black;
     z-index: 1000;
 }
-#tabs{
+
+#tabs {
     height: 100%;
 }
-.input-class{
+
+.input-class {
     margin: 0 auto;
     width: 80%;
 }
-.gm-style-iw div{
+
+.gm-style-iw div {
     overflow: hidden;
 }
 
@@ -72,89 +80,128 @@ input{
     border-bottom-right-radius: 25px;
     text-align: center;
     opacity: 0.5;
+    right: 35px !important;
+    left: auto !important;
+    position: absolute !important;
 }
-#legend:hover{
+
+#legend:hover {
     opacity: 1;
 }
+
 #legend h3 {
     margin-top: 0;
 }
+
 #legend img {
     vertical-align: middle;
 }
-#map-container #map{
+
+#map-container #map {
     height: 90vh !important;
     margin-top: -40px;
 }
-#timeline-wrapper{
+
+#timeline-wrapper {
     padding: 0;
     position: absolute;
     right: 25px;
     top: 5px;
-    width:70%;
+    width: 75%;
     z-index: 1;
 }
-#top-functions{
-    float:left;
+#timeline-play-wrapper{
+    position: relative;
+    top: -17px;
+    display:inline-block;
+}
+#timeline-play-wrapper a{
+    margin-left: 10px;
+    top: 6px;
+    position: relative;
+}
+
+#top-functions {
+    float: left;
     z-index: 1;
 }
-.reporttable-row{
+
+.reporttable-row {
     border-top: 1px solid black;
     color: black;
 }
-#table-container{
+
+#table-container {
     margin-top: 10px;
 }
-#table-container tr.scrolled{
+
+#table-container tr.scrolled {
     border: 2px solid #007FFF;
 }
-#table-container table{
-    background-color: rgba(0, 127, 255,1);
+
+#table-container table {
+    background-color: rgba(0, 127, 255, 1);
 }
-#table-container th{
+
+#table-container th {
     color: white;
     font-weight: bold;
 }
+
 #top-link-block.affix-top {
     position: absolute; /* allows it to "slide" up into view */
     bottom: -82px; /* negative of the offset - height of link element */
     right: 10px; /* padding from the left side of the window */
 }
+
 #top-link-block.affix {
     position: fixed; /* keeps it on the bottom once in view */
     bottom: 18px; /* height of link element */
     right: 10px; /* padding from the left side of the window */
 }
-#filters{
+
+#filters {
     position: absolute;
     z-index: 4;
-    top: 5px;
+    top: 30px;
 }
-.hidden{
+
+.hidden {
     display: none;
 }
-.history-details{
+
+.history-details {
     margin-top: 10px;
 }
 
-#comparemaps-container{
+#comparemaps-container {
     margin-top: 10px;
 }
-.stats-wrapper{
+
+.stats-wrapper {
     margin-top: 10px;
-    padding-top:10px;
+    padding-top: 10px;
     border-top: 1px solid grey;
 }
-.stats-wrapper .stats-title{
+
+.stats-wrapper .stats-title {
     display: inline-block;
     font-weight: bold;
     min-width: 170px;
 }
-.stats-wrapper .stats-value{
+
+.stats-wrapper .stats-value {
     display: inline-block;
     font-style: italic;
 }
-.disease-selector img{
-    margin-top:5px;
+
+.disease-selector img {
+    margin-top: 5px;
     margin-right: 10px;
+}
+
+.search-top-history {
+    margin-bottom: 15px;
+    float: left;
+    margin-left: -20px;
 }

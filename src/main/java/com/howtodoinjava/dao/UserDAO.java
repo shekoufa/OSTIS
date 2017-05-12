@@ -1,6 +1,7 @@
 package com.howtodoinjava.dao;
 
 import com.howtodoinjava.entity.History;
+import com.howtodoinjava.entity.PostalCodeLookup;
 import com.howtodoinjava.entity.Settings;
 import com.howtodoinjava.entity.UserEntity;
 import org.hibernate.SessionFactory;
@@ -26,4 +27,6 @@ public interface UserDAO {
     History findHistoryById(Integer historyId);
     void update(UserEntity user);
     void update(Settings settings);
+
+    List<PostalCodeLookup> selectAllPostalCodeMappings();
 }
